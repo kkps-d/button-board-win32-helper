@@ -3,6 +3,7 @@ A helper program for win32 functionality that communicates with the button-board
 The port can be configured by editing the `helperPort` property in `buttonboard-config.json`.
 
 # Dev TODO
+- [ ] Add VS project to Git
 - [ ] Create notify and callbacks in CoreAudio for:
   - [ ] Audio device changes
   - [ ] Audio device mute status updates
@@ -12,13 +13,12 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
 - [ ] Implement loops to poll for:
   - [ ] Audio device peak meters
   - [ ] Audio session peak meters
-- [ ] Add to API documentation:
-  - [ ] Audio device add/remove update
-  - [ ] Audio device mute status update
-  - [ ] Audio session mute status update
-- [ ] Change to API documentation:
-  - [ ] Add `receiveAudioSessionUpdates` to `WinAudioDevice`. We may not be interested in getting updates for the device that is not active
-- [ ] Add VS project to Git
+- [x] Add to API documentation:
+  - [x] Audio device add/remove update
+  - [x] Audio device mute status update
+  - [x] Audio session mute status update
+- [x] Change to API documentation:
+  - [x] Add `receiveAudioSessionUpdates` to `WinAudioDevice`. We may not be interested in getting updates for the device that is not active
 - [ ] Try to get Github Actions working to:
   - [ ] Build the executable
   - [ ] Do releases
@@ -35,6 +35,10 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
 
 - `getDefaultOutputDevice`
 - `getOutputDevices`
+- `receiveDeviceListUpdates`
+```
+payload = value: boolean
+```
 
 ### From helper program
 - `return_getDefaultOutputDevice`  
@@ -43,6 +47,18 @@ payload = { deviceId: string, friendlyName: string }
 ```
 
 - `return_getOutputDevices`
+```
+payload = { 
+  devices: [{ deviceId: string, friendlyName: string }]
+}
+```
+
+- `receiveDeviceChangedUpdates`
+```
+payload = newState: boolean
+```
+
+- `update_deviceList`
 ```
 payload = { 
   devices: [{ deviceId: string, friendlyName: string }]
@@ -64,6 +80,16 @@ payload = deviceId: string, value: boolean
 ```
 
 - `receiveDeviceVolumeUpdates`
+```
+payload = deviceId: string, value: boolean
+```
+
+- `receiveDeviceMuteUpdates`
+```
+payload = deviceId: string, value: boolean
+```
+
+- `receiveAudioSessionUpdates`
 ```
 payload = deviceId: string, value: boolean
 ```
@@ -123,18 +149,19 @@ payload = deviceId: string, newState: boolean
 payload = deviceId: string, newVolumePercent: int (0 - 100)
 ```
 
-- `return_getAudioSessions`
+- `return_receiveDeviceMuteUpdates`
 ```
-payload = {
-  deviceId: string,
-  audioSessions: [{
-    sessionId: string,
-    friendlyName: string,
-    iconPath: string | null,
-    volumePercent: int (0 - 100),
-    muted: boolean
-  }]
-}
+payload = deviceId: string, newState: boolean
+```
+
+- `update_deviceMute`
+```
+payload = deviceId: string, newState: boolean
+```
+
+- `return_receiveAudioSessionUpdates`
+```
+payload = deviceId: string, newState: boolean
 ```
 
 - `update_audioSessions`
@@ -149,7 +176,21 @@ payload = {
     muted: boolean
   }]
 }
-- Identical to 'return_getAudioSessions'. Should they be handled the same?
+```
+
+- `return_getAudioSessions`
+```
+payload = {
+  deviceId: string,
+  audioSessions: [{
+    sessionId: string,
+    friendlyName: string,
+    iconPath: string | null,
+    volumePercent: int (0 - 100),
+    muted: boolean
+  }]
+}
+- Identical to 'update_audioSessions'. Should they be handled the same?
 ```
 
 - `return_setActiveDevice`
@@ -179,6 +220,11 @@ payload = sessionId: string, value: boolean
 ```
 
 - `receiveSessionVolumeUpdates`
+```
+payload = sessionId: string, value: boolean
+```
+
+- `receiveSessionMuteUpdates`
 ```
 payload = sessionId: string, value: boolean
 ```
@@ -215,6 +261,16 @@ payload = sessionId: string, newState: boolean
 - `update_sessionVolume`
 ```
 payload = sessionId: string, newVolume: int (0 - 100)
+```
+
+- `return_receiveSessionMuteUpdates`
+```
+payload = sessionId: string, newState: boolean
+```
+
+- `update_sessionMute`
+```
+payload = sessionId: string, newState: boolean
 ```
 
 - `return_setSessionVolume`
