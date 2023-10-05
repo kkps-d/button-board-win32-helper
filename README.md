@@ -2,10 +2,31 @@
 A helper program for win32 functionality that communicates with the button-board server. This program communicates with the main process through Windows sockets.  
 The port can be configured by editing the `helperPort` property in `buttonboard-config.json`.
 
+# Dev TODO
+- [ ] Create notify and callbacks in CoreAudio for:
+  - [ ] Audio device changes
+  - [ ] Audio device mute status updates
+  - [ ] Audio session updates
+  - [ ] Audio session volume updates
+  - [ ] Audio session mute status updates
+- [ ] Implement loops to poll for:
+  - [ ] Audio device peak meters
+  - [ ] Audio session peak meters
+- [ ] Add to API documentation:
+  - [ ] Audio device add/remove update
+  - [ ] Audio device mute status update
+  - [ ] Audio session mute status update
+- [ ] Change to API documentation:
+  - [ ] Add `receiveAudioSessionUpdates` to `WinAudioDevice`. We may not be interested in getting updates for the device that is not active
+- [ ] Add VS project to Git
+- [ ] Try to get Github Actions working to:
+  - [ ] Build the executable
+  - [ ] Do releases
+
 # API
 - Below are the messages and payloads used to communicate with the helper program.  
 - JSON Types are annotated using brackets `{ }`, while text messages have no annotations.  
-  - The justification of using just plaintext is to reduce overhead when serializing/deserializing and transmitting messages that are usually spammed, like volume changes or peak meter updates.  
+  - The justification for using just plaintext is to reduce overhead when serializing/deserializing and transmitting messages that are usually spammed, like volume changes or peak meter updates.  
 - Messages with no payloads have no code blocks under them
 
 ## `WinAudio`
