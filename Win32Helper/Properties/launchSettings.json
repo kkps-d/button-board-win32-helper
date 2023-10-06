@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Test API": {
+      "commandName": "Project",
+      "commandLineArgs": "--test-api"
+    },
+    "Win32Helper": {
+      "commandName": "Project",
+      "commandLineArgs": "--port=3124"
+    },
+    "Test Events": {
+      "commandName": "Project",
+      "commandLineArgs": "--test-events"
+    }
+  }
+}
