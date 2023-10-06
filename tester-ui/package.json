@@ -1,0 +1,9 @@
+{
+  "name": "tester-ui",
+  "version": "1.0.0",
+  "description": "Used to test button-board-win32-helper",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
