@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Win32Helper.WinAudio
 {
-    internal class WinAudioDevice
+    internal class Device
     {
         private MMDevice device;
         private AudioEndpointVolumeNotificationDelegate? volumeNotificationDelegate = null;
@@ -45,11 +45,11 @@ namespace Win32Helper.WinAudio
             set => device.Selected = value;
         }
 
-        internal List<WinAudioSession> AudioSessions
+        internal List<Session> AudioSessions
         {
             get
             {
-                List<WinAudioSession> sessions = new List<WinAudioSession>();
+                List<Session> sessions = new List<Session>();
 
                 // Enumerate the audio sessions
                 device!.AudioSessionManager2!.RefreshSessions();
@@ -58,14 +58,14 @@ namespace Win32Helper.WinAudio
 
                 foreach (var audioSesionControl2 in audioSessionControl2Collection!)
                 {
-                    sessions.Add(new WinAudioSession(audioSesionControl2));
+                    sessions.Add(new Session(audioSesionControl2));
                 }
 
                 return sessions;
             }
         }
 
-        internal WinAudioDevice(MMDevice mmDevice)
+        internal Device(MMDevice mmDevice)
         {
             device = mmDevice;
         }

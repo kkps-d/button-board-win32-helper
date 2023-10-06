@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 
 namespace Win32Helper.WinAudio
 {
-    internal class WinAudioSession
+    internal class Session
     {
         private AudioSessionControl2 control;
         private string FiguredOutFriendlyName = "";
@@ -92,7 +92,7 @@ namespace Win32Helper.WinAudio
             get => control.AudioMeterInformation!.MasterPeakValue;
         }
 
-        internal WinAudioSession(AudioSessionControl2 audioSessionControl2)
+        internal Session(AudioSessionControl2 audioSessionControl2)
         {
             control = audioSessionControl2;
         }

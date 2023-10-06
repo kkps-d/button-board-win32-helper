@@ -11,16 +11,16 @@ namespace Win32Helper.WinAudio
     {
         private static MMDeviceEnumerator mmDeviceEnum = new MMDeviceEnumerator(Guid.NewGuid());
 
-        internal static WinAudioDevice DefaultOutputDevice
+        internal static Device DefaultOutputDevice
         {
-            get => new WinAudioDevice(mmDeviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console));
+            get => new Device(mmDeviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console));
         }
 
-        internal static List<WinAudioDevice> OutputDevices
+        internal static List<Device> OutputDevices
         {
             get
             {
-                List<WinAudioDevice> devices = new List<WinAudioDevice>();
+                List<Device> devices = new List<Device>();
 
                 // Get a collection of multimedia device resources
                 MMDeviceCollection mmDeviceCollection = mmDeviceEnum.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
@@ -28,7 +28,7 @@ namespace Win32Helper.WinAudio
                 // Create new WinAudioDevices from the collection
                 foreach (MMDevice device in mmDeviceCollection)
                 {
-                    devices.Add(new WinAudioDevice(device));
+                    devices.Add(new Device(device));
                 }
 
                 return devices;
