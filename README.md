@@ -53,7 +53,7 @@ payload = {
 }
 ```
 
-- `receiveDeviceChangedUpdates`
+- `return_receiveDeviceListUpdates`
 ```
 payload = newState: boolean
 ```
