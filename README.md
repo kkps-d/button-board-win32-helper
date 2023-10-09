@@ -3,13 +3,13 @@ A helper program for win32 functionality that communicates with the button-board
 The port can be configured by editing the `helperPort` property in `buttonboard-config.json`.
 
 # Dev TODO
-- [ ] Add VS project to Git
+- [x] Add VS project to Git
 - [ ] Create notify and callbacks in CoreAudio for:
-  - [ ] Audio device changes
-  - [ ] Audio device mute status updates
-  - [ ] Audio session updates
-  - [ ] Audio session volume updates
-  - [ ] Audio session mute status updates
+  - [x] Audio device changes (default device changed)
+  - [x] Audio device volume & mute status updates
+  - [x] Audio session creation updates
+  - [ ] Audio session volume & mute updates
+  - [ ] Audio session deleted/disconnected/expired updates
 - [ ] Implement loops to poll for:
   - [ ] Audio device peak meters
   - [ ] Audio session peak meters
@@ -53,7 +53,7 @@ payload = {
 }
 ```
 
-- `receiveDeviceChangedUpdates`
+- `return_receiveDeviceListUpdates`
 ```
 payload = newState: boolean
 ```
