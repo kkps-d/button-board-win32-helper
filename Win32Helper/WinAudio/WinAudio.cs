@@ -36,28 +36,28 @@ namespace Win32Helper.WinAudio
             }
         }
 
-        internal delegate void defaultDeviceChangeCallbackDelegate(DefaultDeviceChangedEventArgs args);
-        private static defaultDeviceChangeCallbackDelegate? defaultDeviceChangeCallback = null;
+        internal delegate void defaultDeviceChangedCallback(DefaultDeviceChangedEventArgs args);
+        private static defaultDeviceChangedCallback? defaultDeviceChanged = null;
 
-        internal static void RegisterDeviceChangeCallback(defaultDeviceChangeCallbackDelegate callback)
+        internal static void RegisterDeviceChangedCallback(defaultDeviceChangedCallback callback)
         {
-            UnregisterDeviceChangeCallback();
+            UnregisterDeviceChangedCallback();
 
-            defaultDeviceChangeCallback = callback;
-            notificationClient.DefaultDeviceChanged += DeviceChangeCallbackAdapter;
+            defaultDeviceChanged = callback;
+            notificationClient.DefaultDeviceChanged += DeviceChangedCallbackAdapter;
         }
 
-        internal static void UnregisterDeviceChangeCallback()
+        internal static void UnregisterDeviceChangedCallback()
         {
-            if (defaultDeviceChangeCallback == null) return;
+            if (defaultDeviceChanged == null) return;
 
-            notificationClient.DefaultDeviceChanged -= DeviceChangeCallbackAdapter;
-            defaultDeviceChangeCallback = null;
+            notificationClient.DefaultDeviceChanged -= DeviceChangedCallbackAdapter;
+            defaultDeviceChanged = null;
         }
 
-        private static void DeviceChangeCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
+        private static void DeviceChangedCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
         {
-            defaultDeviceChangeCallback?.Invoke(args);
+            defaultDeviceChanged?.Invoke(args);
         }
     }
 }

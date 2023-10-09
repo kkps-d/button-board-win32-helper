@@ -70,54 +70,54 @@ namespace Win32Helper.WinAudio
             device = mmDevice;
         }
 
-        internal delegate void volumeChangeCallbackDelegate(bool muted, int volumePercent);
-        private volumeChangeCallbackDelegate? volumeChangeCallback = null;
+        internal delegate void volumeChangedCallback(bool muted, int volumePercent);
+        private volumeChangedCallback? volumeChanged = null;
 
-        public void RegisterVolumeChangeCallback(volumeChangeCallbackDelegate callback)
+        public void RegisterVolumeChangedCallback(volumeChangedCallback callback)
         {
             // Remove the previous delegate if it exists
-            UnregisterVolumeChangeCallback();
+            UnregisterVolumeChangedCallback();
 
-            volumeChangeCallback = callback;
-            device!.AudioEndpointVolume!.OnVolumeNotification += VolumeChangeCallbackAdapter;
+            volumeChanged = callback;
+            device!.AudioEndpointVolume!.OnVolumeNotification += VolumeChangedCallbackAdapter;
         }
 
-        public void UnregisterVolumeChangeCallback()
+        public void UnregisterVolumeChangedCallback()
         {
-            if (volumeChangeCallback == null) return;
+            if (volumeChanged == null) return;
 
-            device!.AudioEndpointVolume!.OnVolumeNotification -= VolumeChangeCallbackAdapter;
-            volumeChangeCallback = null;
+            device!.AudioEndpointVolume!.OnVolumeNotification -= VolumeChangedCallbackAdapter;
+            volumeChanged = null;
         }
 
 
-        internal delegate void sessionCreateCallbackDelegate(List<Session> sessions);
-        private sessionCreateCallbackDelegate? sessionCreateCallback = null;
+        internal delegate void sessionCreatedCallback(List<Session> sessions);
+        private sessionCreatedCallback? sessionCreated = null;
 
-        private void VolumeChangeCallbackAdapter(AudioVolumeNotificationData data)
+        private void VolumeChangedCallbackAdapter(AudioVolumeNotificationData data)
         {
-            volumeChangeCallback!.Invoke(data.Muted, (int)(data.MasterVolume * 100));
+            volumeChanged!.Invoke(data.Muted, (int)(data.MasterVolume * 100));
         }
 
-        internal void RegisterSessionCreateCallback(sessionCreateCallbackDelegate callback)
+        internal void RegisterSessionCreatedCallback(sessionCreatedCallback callback)
         {
-            UnregisterSessionCreateCallback();
+            UnregisterSessionCreatedCallback();
 
-            sessionCreateCallback = callback;
-            device!.AudioSessionManager2!.OnSessionCreated += SessionCreateCallbackAdapter;
+            sessionCreated = callback;
+            device!.AudioSessionManager2!.OnSessionCreated += SessionCreatedCallbackAdapter;
         }
 
-        internal void UnregisterSessionCreateCallback()
+        internal void UnregisterSessionCreatedCallback()
         {
-            if (sessionCreateCallback == null) return;
+            if (sessionCreated == null) return;
 
-            device!.AudioSessionManager2!.OnSessionCreated -= SessionCreateCallbackAdapter;
-            sessionCreateCallback = null;
+            device!.AudioSessionManager2!.OnSessionCreated -= SessionCreatedCallbackAdapter;
+            sessionCreated = null;
         }
 
-        private void SessionCreateCallbackAdapter(object sender, IAudioSessionControl2 newSession)
+        private void SessionCreatedCallbackAdapter(object sender, IAudioSessionControl2 newSession)
         {
-            sessionCreateCallback!.Invoke(AudioSessions);
+            sessionCreated!.Invoke(AudioSessions);
         }
     }
 }
