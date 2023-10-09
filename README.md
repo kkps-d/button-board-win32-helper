@@ -10,6 +10,7 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
   - [x] Audio session creation updates
   - [x] Audio session volume & mute updates
   - [x] Audio session invalidation (deleted/disconnected/expired) updates
+- [ ] Implement socket server to send events
 - [ ] Implement loops to poll for:
   - [ ] Audio device peak meters
   - [ ] Audio session peak meters
