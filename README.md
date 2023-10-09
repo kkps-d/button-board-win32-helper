@@ -4,12 +4,12 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
 
 # Dev TODO
 - [x] Add VS project to Git
-- [ ] Create notify and callbacks in CoreAudio for:
+- [x] Create notify and callbacks in CoreAudio for:
   - [x] Audio device changes (default device changed)
   - [x] Audio device volume & mute status updates
   - [x] Audio session creation updates
-  - [ ] Audio session volume & mute updates
-  - [ ] Audio session deleted/disconnected/expired updates
+  - [x] Audio session volume & mute updates
+  - [x] Audio session invalidation (deleted/disconnected/expired) updates
 - [ ] Implement loops to poll for:
   - [ ] Audio device peak meters
   - [ ] Audio session peak meters
