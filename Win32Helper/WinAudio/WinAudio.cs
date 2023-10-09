@@ -10,12 +10,7 @@ namespace Win32Helper.WinAudio
     internal class WinAudio
     {
         private static MMDeviceEnumerator mmDeviceEnum = new MMDeviceEnumerator(Guid.NewGuid());
-
         private static MMNotificationClient notificationClient = new MMNotificationClient(mmDeviceEnum); 
-
-        internal delegate void defaultDeviceChangeCallbackDelegate(DefaultDeviceChangedEventArgs args);
-
-        private static defaultDeviceChangeCallbackDelegate? defaultDeviceChangeCallback = null;
 
         internal static Device DefaultOutputDevice
         {
@@ -40,6 +35,9 @@ namespace Win32Helper.WinAudio
                 return devices;
             }
         }
+
+        internal delegate void defaultDeviceChangeCallbackDelegate(DefaultDeviceChangedEventArgs args);
+        private static defaultDeviceChangeCallbackDelegate? defaultDeviceChangeCallback = null;
 
         static internal void RegisterDeviceChangeCallback(defaultDeviceChangeCallbackDelegate callback)
         {

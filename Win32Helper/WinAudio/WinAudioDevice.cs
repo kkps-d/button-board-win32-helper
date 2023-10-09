@@ -12,12 +12,6 @@ namespace Win32Helper.WinAudio
     {
         private MMDevice device;
 
-        internal delegate void volumeChangeCallbackDelegate(bool muted, int volumePercent);
-        private static volumeChangeCallbackDelegate? volumeChangeCallback = null;
-
-        internal delegate void sessionCreateCallbackDelegate(List<Session> sessions);
-        private static sessionCreateCallbackDelegate? sessionCreateCallback = null;
-
         internal string FriendlyName
         {
             get => device!.DeviceFriendlyName!;
@@ -76,6 +70,9 @@ namespace Win32Helper.WinAudio
             device = mmDevice;
         }
 
+        internal delegate void volumeChangeCallbackDelegate(bool muted, int volumePercent);
+        private static volumeChangeCallbackDelegate? volumeChangeCallback = null;
+
         public void RegisterVolumeChangeCallback(volumeChangeCallbackDelegate callback)
         {
             // Remove the previous delegate if it exists
@@ -93,6 +90,10 @@ namespace Win32Helper.WinAudio
             volumeChangeCallback = null;
         }
 
+
+        internal delegate void sessionCreateCallbackDelegate(List<Session> sessions);
+        private static sessionCreateCallbackDelegate? sessionCreateCallback = null;
+
         internal void VolumeChangeCallbackAdapter(AudioVolumeNotificationData data)
         {
             volumeChangeCallback!.Invoke(data.Muted, (int)(data.MasterVolume * 100));
@@ -103,20 +104,20 @@ namespace Win32Helper.WinAudio
             UnregisterSessionCreateCallback();
 
             sessionCreateCallback = callback;
-            device.AudioSessionManager2.OnSessionCreated += SessionCreateCallbackAdapter;
+            device!.AudioSessionManager2!.OnSessionCreated += SessionCreateCallbackAdapter;
         }
 
         public void UnregisterSessionCreateCallback()
         {
             if (sessionCreateCallback == null) return;
 
-            device.AudioSessionManager2.OnSessionCreated -= SessionCreateCallbackAdapter;
+            device!.AudioSessionManager2!.OnSessionCreated -= SessionCreateCallbackAdapter;
             sessionCreateCallback = null;
         }
 
         internal void SessionCreateCallbackAdapter(object sender, IAudioSessionControl2 newSession)
         {
-            sessionCreateCallback.Invoke(AudioSessions);
+            sessionCreateCallback!.Invoke(AudioSessions);
         }
     }
 }
