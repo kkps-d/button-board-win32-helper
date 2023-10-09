@@ -15,7 +15,7 @@ namespace Win32Helper.Tests
 
             CancellationTokenSource cts = new CancellationTokenSource();
 
-            WinAudio.WinAudio.RegisterDeviceChangeCallback((_) =>
+            WinAudio.WinAudio.RegisterDeviceChangedCallback((_) =>
             {
                 cts.Cancel();
                 cts.Dispose();
@@ -45,29 +45,47 @@ namespace Win32Helper.Tests
             string deviceName = device.FriendlyName;
             string volume = device.VolumePercent.ToString() + "%    ";
             string isMuted = device.Muted.ToString();
+            string mostRecentSessionVolumeChange = "";
 
-            device.RegisterVolumeChangeCallback((bool newMuted, int newVolume) =>
+            // Listen for device (endpoint) volume changed
+            device.RegisterVolumeChangedCallback((bool newMuted, int newVolume) =>
             {
                 volume = newVolume.ToString() + "%    ";
                 isMuted = newMuted.ToString() + "   ";
             });
 
-            device.RegisterSessionCreateCallback((List<WinAudio.Session> newSessions) =>
+            // Listen for sessions being created
+            device.RegisterSessionCreatedCallback((List<WinAudio.Session> newSessions) =>
             {
                 sessions = newSessions;
             });
+
+            foreach (WinAudio.Session session in sessions)
+            {
+                // Listen for session no longer is valid
+                session.RegisterSessionInvalidatedCallback((WinAudio.Session.InvalidationReason reason) =>
+                {
+                    sessions.Remove(session);
+                });
+
+                // Listen for session volume change
+                session.RegisterVolumeChangedCallback((bool newState, int newVolume) =>
+                {
+                    mostRecentSessionVolumeChange = $"Session: {session.FriendlyName}, Volume: {newVolume}, Mute: {newState}   ";
+                });
+            }
 
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
 
-                string outString = "Current device: " + deviceName + "\nVolume: " + volume + "\nIs muted?: " + isMuted + "\n\n";
+                string outString = "Current device: " + deviceName + "\nVolume: " + volume + "\nIs muted?: " + isMuted + "\n" + mostRecentSessionVolumeChange + "\n\n";
                 
                 foreach (WinAudio.Session session in sessions)
                 {
                     string bar = DrawMeter(30, session.PeakValue, 1f);
 
-                    outString += session.FriendlyName + ", " + session.VolumePercent + "%, " + (session.Muted ? "Muted  " : "Unmuted") + "\n" + bar + "\n";
+                    outString += session.FriendlyName + ", " + session.VolumePercent + "%, " + (session.Muted ? "Muted, " : "Unmuted, ") + (session.Invalid ? "Invalid  " : "Valid   ") + "\n" + bar + "\n";
                 }
 
                 Console.WriteLine(outString);

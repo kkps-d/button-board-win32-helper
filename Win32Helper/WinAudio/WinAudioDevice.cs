@@ -73,16 +73,16 @@ namespace Win32Helper.WinAudio
         internal delegate void volumeChangedCallback(bool muted, int volumePercent);
         private volumeChangedCallback? volumeChanged = null;
 
-        public void RegisterVolumeChangedCallback(volumeChangedCallback callback)
+        internal void RegisterVolumeChangedCallback(volumeChangedCallback callback)
         {
-            // Remove the previous delegate if it exists
+            // Remove the previous callback if it exists
             UnregisterVolumeChangedCallback();
 
             volumeChanged = callback;
             device!.AudioEndpointVolume!.OnVolumeNotification += VolumeChangedCallbackAdapter;
         }
 
-        public void UnregisterVolumeChangedCallback()
+        internal void UnregisterVolumeChangedCallback()
         {
             if (volumeChanged == null) return;
 

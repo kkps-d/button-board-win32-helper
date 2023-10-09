@@ -9,8 +9,21 @@ namespace Win32Helper.WinAudio
 {
     internal class Session
     {
+        internal enum InvalidationReason
+        {
+            SessionExpired,
+            SessionDisconnected,
+        }
+
         private AudioSessionControl2 control;
         private string FiguredOutFriendlyName = "";
+
+        private bool _invalid = false;
+
+        internal bool Invalid
+        {
+            get => _invalid;
+        }
 
         internal string FriendlyName
         {
@@ -95,6 +108,72 @@ namespace Win32Helper.WinAudio
         internal Session(AudioSessionControl2 audioSessionControl2)
         {
             control = audioSessionControl2;
+
+            // Listen for session expire and terminated events. User should not be able to control or view these sessions
+            control.OnStateChanged += SessionStateChangeCallbackAdapter;
+
+            control.OnSessionDisconnected += SessionDisconnectCallbackAdapter;
+        }
+
+        internal delegate void sessionInvalidatedCallback(InvalidationReason reason);
+        private sessionInvalidatedCallback? sessionInvalidated = null;
+
+        internal void RegisterSessionInvalidatedCallback(sessionInvalidatedCallback callback)
+        {
+            UnregisterSessionInvalidatedCallback();
+
+            sessionInvalidated = callback;
+        }
+
+        internal void UnregisterSessionInvalidatedCallback()
+        {
+            sessionInvalidated = null;
+        }
+
+        private void SessionStateChangeCallbackAdapter(object sender, AudioSessionState state)
+        {
+            if (state == AudioSessionState.AudioSessionStateExpired)
+            {
+                _invalid = true;
+                sessionInvalidated?.Invoke(InvalidationReason.SessionExpired);
+                UnregisterSessionInvalidatedCallback();
+                control.OnStateChanged -= SessionStateChangeCallbackAdapter;
+                control.OnSessionDisconnected -= SessionDisconnectCallbackAdapter;
+            }
+        }
+
+        private void SessionDisconnectCallbackAdapter(object sender, AudioSessionDisconnectReason disconnectReason)
+        {
+            _invalid = true;
+            sessionInvalidated?.Invoke(InvalidationReason.SessionDisconnected);
+            UnregisterSessionInvalidatedCallback();
+            control.OnStateChanged -= SessionStateChangeCallbackAdapter;
+            control.OnSessionDisconnected -= SessionDisconnectCallbackAdapter;
+        }
+
+        internal delegate void volumeChangedCallback(bool muted, int volumePercent);
+        private volumeChangedCallback? volumeChanged = null;
+
+        internal void RegisterVolumeChangedCallback(volumeChangedCallback callback)
+        {
+            // Remove the previous callback if it exists
+            UnregisterVolumeChangedCallback();
+
+            volumeChanged = callback;
+            control.OnSimpleVolumeChanged += VolumeChangedCallbackAdapter;
+        }
+
+        internal void UnregisterVolumeChangedCallback()
+        {
+            if (volumeChanged == null) return;
+
+            control.OnSimpleVolumeChanged -= VolumeChangedCallbackAdapter;
+            volumeChanged = null;
+        }
+
+        private void VolumeChangedCallbackAdapter(object sender, float newVolume, bool newMute)
+        {
+            volumeChanged!.Invoke(newMute, (int)(newVolume * 100));
         }
 
         private string FigureOutFriendlyName()
@@ -140,7 +219,7 @@ namespace Win32Helper.WinAudio
         {
             Icon? result = null;
 
-            if (String.IsNullOrEmpty(path)) return null;
+            if (string.IsNullOrEmpty(path)) return null;
 
             try
             {
