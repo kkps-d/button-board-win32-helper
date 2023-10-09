@@ -39,7 +39,7 @@ namespace Win32Helper.WinAudio
         internal delegate void defaultDeviceChangeCallbackDelegate(DefaultDeviceChangedEventArgs args);
         private static defaultDeviceChangeCallbackDelegate? defaultDeviceChangeCallback = null;
 
-        static internal void RegisterDeviceChangeCallback(defaultDeviceChangeCallbackDelegate callback)
+        internal static void RegisterDeviceChangeCallback(defaultDeviceChangeCallbackDelegate callback)
         {
             UnregisterDeviceChangeCallback();
 
@@ -47,7 +47,7 @@ namespace Win32Helper.WinAudio
             notificationClient.DefaultDeviceChanged += DeviceChangeCallbackAdapter;
         }
 
-        static internal void UnregisterDeviceChangeCallback()
+        internal static void UnregisterDeviceChangeCallback()
         {
             if (defaultDeviceChangeCallback == null) return;
 
@@ -55,7 +55,7 @@ namespace Win32Helper.WinAudio
             defaultDeviceChangeCallback = null;
         }
 
-        static void DeviceChangeCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
+        private static void DeviceChangeCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
         {
             defaultDeviceChangeCallback?.Invoke(args);
         }
