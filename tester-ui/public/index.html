@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tester</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="bar top">
+        <div class="top-row-1">
+          <h1>Device:</h1>
+          <select id="device-select">
+            <option>1</option>
+            <option>2</option>
+          </select>
+          <button id="activate-device">Set as active</button>
+        </div>
+        <div class="top-row-2">
+          <div class="vol-range" id="device-vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="rows" class="rows">
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+        <div class="session bar">
+          <div class="icon">
+            <img
+              src="https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg"
+              alt=""
+            />
+          </div>
+          <span class="label">The quick brown fox jumps</span>
+          <div class="vol-range">
+            <button>🔊</button>
+            <div class="range">
+              <div class="peak-meter"><div class="peak-meter-bar"></div></div>
+              <input type="range" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="terminal bar" id="terminal"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="elements.js"></script>
+    <script src="sockets.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
