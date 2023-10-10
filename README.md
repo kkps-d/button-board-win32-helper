@@ -50,9 +50,7 @@ payload = { deviceId: string, friendlyName: string }
 
 - `return_getOutputDevices`
 ```
-payload = { 
-  devices: [{ deviceId: string, friendlyName: string }]
-}
+payload = [{ deviceId: string, friendlyName: string }]
 ```
 
 - `return_receiveDeviceListUpdates`
@@ -62,9 +60,7 @@ payload = newState: boolean
 
 - `update_deviceList`
 ```
-payload = { 
-  devices: [{ deviceId: string, friendlyName: string }]
-}
+payload = [{ deviceId: string, friendlyName: string }]
 ```
 
 ## `WinAudioDevice`
