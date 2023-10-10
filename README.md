@@ -3,25 +3,27 @@ A helper program for win32 functionality that communicates with the button-board
 The port can be configured by editing the `helperPort` property in `buttonboard-config.json`.
 
 # Dev TODO
-- [x] Add VS project to Git
-- [ ] Create notify and callbacks in CoreAudio for:
-  - [x] Audio device changes (default device changed)
-  - [x] Audio device volume & mute status updates
-  - [x] Audio session creation updates
-  - [ ] Audio session volume & mute updates
-  - [ ] Audio session deleted/disconnected/expired updates
+- [ ] Implement socket server to send events
 - [ ] Implement loops to poll for:
   - [ ] Audio device peak meters
   - [ ] Audio session peak meters
+- [ ] Implement sndvol style web interface for testing
+- [ ] Try to get Github Actions working to:
+  - [ ] Build the executable
+  - [ ] Do releases
+- [x] Add VS project to Git
+- [x] Create notify and callbacks in CoreAudio for:
+  - [x] Audio device changes (default device changed)
+  - [x] Audio device volume & mute status updates
+  - [x] Audio session creation updates
+  - [x] Audio session volume & mute updates
+  - [x] Audio session invalidation (deleted/disconnected/expired) updates
 - [x] Add to API documentation:
   - [x] Audio device add/remove update
   - [x] Audio device mute status update
   - [x] Audio session mute status update
 - [x] Change to API documentation:
   - [x] Add `receiveAudioSessionUpdates` to `WinAudioDevice`. We may not be interested in getting updates for the device that is not active
-- [ ] Try to get Github Actions working to:
-  - [ ] Build the executable
-  - [ ] Do releases
 
 # API
 - Below are the messages and payloads used to communicate with the helper program.  
