@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using static Win32Helper.Server;
 using Win32Helper.Tests;
 
 namespace Win32Helper
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ArgumentParser parser = new ArgumentParser(args);
             Console.WriteLine("button-board Win32 Helper");
@@ -20,7 +21,7 @@ namespace Win32Helper
             } else if (!parser.GetValue("port").Equals(""))
             {
                 int port = int.Parse(parser.GetValue("port"));
-                Console.WriteLine("Run socket program at port {0}", port);
+                await Server.Start(port, true);
             }
         }
     }
