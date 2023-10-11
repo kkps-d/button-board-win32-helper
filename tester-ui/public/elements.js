@@ -8,10 +8,10 @@ const devicePeakMeterBar = deviceVolRange.querySelector(".peak-meter-bar");
 
 // Terminal
 const terminalDiv = document.getElementById("terminal");
-const terminalHeight = 5;
+const terminalHeight = 20;
 let lines = new Array(terminalHeight).fill("~");
 renderTerminal();
-function addLineToTerminal(line) {
+function addLineToTerminal(line = "") {
   lines.shift();
   lines.push(line);
   renderTerminal();

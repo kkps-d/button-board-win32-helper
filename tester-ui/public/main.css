@@ -20,9 +20,9 @@ body {
 
 .container {
   overflow: auto;
-  min-width: 50%;
-  min-height: 60%;
-  height: 60%;
+  min-width: 60%;
+  min-height: 70%;
+  height: 70%;
   resize: both;
 
   display: flex;
