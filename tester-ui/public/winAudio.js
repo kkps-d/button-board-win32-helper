@@ -3,18 +3,7 @@ socket.on("connect", () => {
 
   socket.emit("winAudio", "getOutputDevices", "", (payloadUnprocessed) => {
     const devices = treatPayloadAsJson(payloadUnprocessed);
-    deviceSelect.innerHTML = "";
-    let activeDeviceId;
-    for (let device of devices) {
-      let deviceOption = document.createElement("option");
-      deviceOption.innerText = device.friendlyName;
-      deviceOption.value = device.deviceId;
-      if (device.selected) {
-        activeDeviceId = device.deviceId;
-        deviceOption.selected = true;
-      }
-      deviceSelect.appendChild(deviceOption);
-    }
+    addDevicesToSelector(devices);
   });
 });
 

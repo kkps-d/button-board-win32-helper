@@ -77,7 +77,6 @@ function dataHandlerFunction(data) {
   // message,messageNum,payload
   let dataString = data.toString();
   let splitData = dataString.split(",");
-  console.log(splitData);
   let message = splitData[0];
   let msgNum = Number.parseInt(splitData[1]);
   let payload = splitData.slice(2).join(",");

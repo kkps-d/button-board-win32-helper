@@ -135,6 +135,12 @@ h1 {
   background-color: lime;
 }
 
+.vol-range > .indicator {
+  width: 30px;
+  text-align: center;
+  line-height: 25px;
+}
+
 .session {
   border-bottom: 1px solid gray;
   display: flex;

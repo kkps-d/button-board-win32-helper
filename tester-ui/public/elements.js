@@ -4,7 +4,25 @@ const activateDeviceBtn = document.getElementById("activate-device");
 const deviceVolRange = document.getElementById("device-vol-range");
 const muteDeviceBtn = deviceVolRange.querySelector("button");
 const deviceVolInput = deviceVolRange.querySelector("input");
+const deviceVolIndicator = deviceVolRange.querySelector(".indicator");
 const devicePeakMeterBar = deviceVolRange.querySelector(".peak-meter-bar");
+
+function addDevicesToSelector(devices) {
+  deviceSelect.innerHTML = "";
+  let activeDeviceId;
+  for (let device of devices) {
+    let deviceOption = document.createElement("option");
+    deviceOption.innerText = device.friendlyName;
+    deviceOption.value = device.deviceId;
+    if (device.selected) {
+      activeDeviceId = device.deviceId;
+      deviceOption.selected = true;
+      deviceVolInput.value = device.volumePercent;
+      deviceVolIndicator.innerText = device.volumePercent;
+    }
+    deviceSelect.appendChild(deviceOption);
+  }
+}
 
 // Terminal
 const terminalDiv = document.getElementById("terminal");
