@@ -65,7 +65,13 @@ payload = msgId: number, newState: boolean
 
 - `update_deviceList`
 ```
-payload = [{ deviceId: string, friendlyName: string }]
+payload = [{
+  deviceId: string,
+  friendlyName: string,
+  volumePercent: int (0 - 100),
+  muted: boolean,
+  selected: boolean
+}]
 ```
 
 ## `WinAudioDevice`
