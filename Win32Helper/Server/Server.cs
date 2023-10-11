@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 
 namespace Win32Helper
@@ -51,15 +52,61 @@ namespace Win32Helper
 
                 while (true)
                 {
-                NetworkStream stream = client.GetStream();
+                    NetworkStream stream = client.GetStream();
                     byte[] buffer = new byte[4096];
                     int bytesRead = await stream.ReadAsync(buffer);
 
                     if (bytesRead == 0) throw new IOException("No bytes were read. Stream may be closed and client may have disconnected");
 
-                    string message = Encoding.ASCII.GetString(buffer);
+                    string receivedString = Encoding.ASCII.GetString(buffer);
+                    string[] messages = receivedString.Split(";");
 
-                    Console.WriteLine("[HandleClient] Received: {0}", message);
+                    foreach (string message in messages)
+                    {
+                        if (message.StartsWith('\0')) continue;
+
+                        // getAudioSessions,7,{0.0.0.00000000}.{608aeb73-45a2-4291-8e49-4af3adcd1ccc}
+
+                        string command = "";
+                        int messageNum = 0;
+                        string payload = "";
+
+                        int firstCommaIndex = message.IndexOf(",");
+                        if (firstCommaIndex <= 0) continue; // Potentially corrupted message
+
+                        command = message.Substring(0, firstCommaIndex);
+
+                        int secondCommaIndex = message.IndexOf(",", firstCommaIndex + 1);
+
+                        Console.WriteLine("{0}, {1}", firstCommaIndex, secondCommaIndex);
+
+                        if (secondCommaIndex <= 0)
+                        {
+                            messageNum = int.Parse(message.Substring(firstCommaIndex + 1));
+                        } else
+                        {
+                            messageNum = int.Parse(message.Substring(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1));
+                            payload = message.Substring(secondCommaIndex + 1);
+                        }
+
+                        Console.WriteLine("[HandleClient] Command: '{0}', MsgNum: {1}, Payload: '{2}'", command, messageNum, payload);
+
+                        // Convert the method to upper case
+                        string methodName = char.ToUpper(command[0]) + command.Substring(1);
+
+                        // Get the method and call it
+                        MethodInfo? method = typeof(ServerFunctions).GetMethod(methodName);
+                        if (method != null)
+                        {
+                            method.Invoke(null, new object[] { stream, messageNum, payload });
+                        }
+                        else
+                        {
+                            Console.WriteLine("[HandleClient] Unknown command '{0}'", methodName);
+                        }
+                    }
+
+
                 }
 
                 client.Close();
