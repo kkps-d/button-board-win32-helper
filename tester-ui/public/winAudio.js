@@ -1,7 +1,7 @@
 socket.on("connect", () => {
   addLineToTerminal("Connected to web server");
 
-  socket.emit("winAudio", "getOutputDevices", (payload) => {
+  socket.emit("winAudio", "getOutputDevices", "", (payloadUnprocessed) => {
     const devices = treatPayloadAsJson(payloadUnprocessed);
     deviceSelect.innerHTML = "";
     let activeDeviceId;
@@ -28,6 +28,7 @@ socket.on("winAudio", (message) => {
 });
 
 function splitMessage(message) {
+  console.log(message);
   const firstComma = message.indexOf(",");
   const event = message.slice(0, firstComma);
   const payloadUnprocessed = message.slice(firstComma + 1);
