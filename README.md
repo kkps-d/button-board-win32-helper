@@ -49,7 +49,13 @@ payload = msgId: number, value: boolean
 ### From helper program
 - `return_getOutputDevices`
 ```
-payload = msgId: number, [{ deviceId: string, friendlyName: string }]
+payload = msgId: number, [{
+  deviceId: string,
+  friendlyName: string,
+  volumePercent: int (0 - 100),
+  muted: boolean,
+  selected: boolean
+}]
 ```
 
 - `return_receiveDeviceListUpdates`
@@ -65,11 +71,6 @@ payload = [{ deviceId: string, friendlyName: string }]
 ## `WinAudioDevice`
 
 ### To helper program
-
-- `getDevice`
-```
-payload = msgId: number, deviceId: string
-```
 
 - `receiveDevicePeakValueUpdates`
 ```
@@ -104,17 +105,6 @@ payload = msgId: number, deviceId: string, muted: boolean, volumePercent: int (0
 ```
 
 ### From helper program
-
-- `return_getDevice`
-```
-payload = msgId: number, {
-  deviceId: string,
-  friendlyName: string,
-  volumePercent: int (0 - 100),
-  muted: boolean,
-  selected: boolean
-}
-```
 
 - `return_receiveDevicePeakValueUpdates`
 ```
