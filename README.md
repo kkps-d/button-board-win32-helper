@@ -29,144 +29,115 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
 - Below are the messages and payloads used to communicate with the helper program.  
 - JSON Types are annotated using brackets `{ }`, while text messages have no annotations.  
   - The justification for using just plaintext is to reduce overhead when serializing/deserializing and transmitting messages that are usually spammed, like volume changes or peak meter updates.  
-- Messages with no payloads have no code blocks under them
+- All messages must be provided with a unique int as the first argument in a payload that does not exceed Int32.Max. This number is passed back unchanged in a response message, and is useful for identifying the results of a previous message. If the payload is JSON, the ID must NOT be part of the JSON text, and must be before it.
+  - Messages that initially sent by the helper (e.g. updates) will not contain the message ID
 
 ## `WinAudio`
 
 ### To helper program
 
-- `getDefaultOutputDevice`
-- `getOutputDevices`
-- `receiveDeviceListUpdates`
+#### `getOutputDevices`
 ```
-payload = value: boolean
+payload = msgId: number
+```
+
+#### `receiveDeviceListUpdates`
+```
+payload = msgId: number, value: boolean
 ```
 
 ### From helper program
-- `return_getDefaultOutputDevice`  
+#### `return_getOutputDevices`
 ```
-payload = { deviceId: string, friendlyName: string }
-```
-
-- `return_getOutputDevices`
-```
-payload = { 
-  devices: [{ deviceId: string, friendlyName: string }]
-}
-```
-
-- `return_receiveDeviceListUpdates`
-```
-payload = newState: boolean
+payload = msgId: number, [{
+  deviceId: string,
+  friendlyName: string,
+  volumePercent: int (0 - 100),
+  muted: boolean,
+  selected: boolean
+}]
 ```
 
-- `update_deviceList`
+#### `return_receiveDeviceListUpdates`
 ```
-payload = { 
-  devices: [{ deviceId: string, friendlyName: string }]
-}
+payload = msgId: number, newState: boolean
+```
+
+#### `update_deviceList`
+```
+payload = [{
+  deviceId: string,
+  friendlyName: string,
+  volumePercent: int (0 - 100),
+  muted: boolean,
+  selected: boolean
+}]
 ```
 
 ## `WinAudioDevice`
 
 ### To helper program
 
-- `getDevice`
+#### `receiveDevicePeakValueUpdates`
 ```
-payload = deviceId: string
-```
-
-- `receiveDevicePeakValueUpdates`
-```
-payload = deviceId: string, value: boolean
+payload = msgId: number, deviceId: string, value: boolean
 ```
 
-- `receiveDeviceVolumeUpdates`
+#### `receiveDeviceVolumeUpdates`
 ```
-payload = deviceId: string, value: boolean
-```
-
-- `receiveDeviceMuteUpdates`
-```
-payload = deviceId: string, value: boolean
+payload = msgId: number, deviceId: string, value: boolean
 ```
 
-- `receiveAudioSessionUpdates`
+#### `receiveAudioSessionUpdates`
 ```
-payload = deviceId: string, value: boolean
-```
-
-- `getAudioSessions`
-```
-payload = deviceId: string
+payload = msgId: number, deviceId: string, value: boolean
 ```
 
-- `setActiveDevice`
+#### `getAudioSessions`
 ```
-payload = deviceId: string
+payload = msgId: number, deviceId: string
 ```
 
-- `setDeviceVolume`
+#### `setActiveDevice`
 ```
-payload = deviceId: string, volumePercent: int (0 - 100), confirmVolumeChange: boolean
+payload = msgId: number, deviceId: string
+```
+
+#### `setDeviceVolume`
+```
+payload = msgId: number, deviceId: string, muted: boolean, volumePercent: int (0 - 100), confirmVolumeChange: boolean
 - 'confirmVolumeChange' supresses 'return_setDeviceVolume' if false.
 - This method also does not fire 'update_deviceVolume'.
 ```
 
-- `setDeviceMute`
-```
-payload = deviceId: string, value: boolean
-```
-
 ### From helper program
 
-- `return_getDevice`
+#### `return_receiveDevicePeakValueUpdates`
 ```
-payload = {
-  deviceId: string,
-  friendlyName: string,
-  volumePercent: int (0 - 100),
-  muted: boolean,
-  selected: boolean
-}
+payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-- `return_receiveDevicePeakValueUpdates`
-```
-payload = deviceId: string, newState: boolean
-```
-
-- `update_devicePeakValue`
+#### `update_devicePeakValue`
 ```
 payload = deviceId: string, newPeakValue: float (0 - 1)
 ```
 
-- `return_receiveDeviceVolumeUpdates`
+#### `return_receiveDeviceVolumeUpdates`
 ```
-payload = deviceId: string, newState: boolean
-```
-
-- `update_deviceVolume`
-```
-payload = deviceId: string, newVolumePercent: int (0 - 100)
+payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-- `return_receiveDeviceMuteUpdates`
+#### `update_deviceVolume`
 ```
-payload = deviceId: string, newState: boolean
-```
-
-- `update_deviceMute`
-```
-payload = deviceId: string, newState: boolean
+payload = deviceId: string, newMuted: boolean, newVolumePercent: int (0 - 100)
 ```
 
-- `return_receiveAudioSessionUpdates`
+#### `return_receiveAudioSessionUpdates`
 ```
-payload = deviceId: string, newState: boolean
+payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-- `update_audioSessions`
+#### `update_audioSessions`
 ```
 payload = {
   deviceId: string,
@@ -180,9 +151,9 @@ payload = {
 }
 ```
 
-- `return_getAudioSessions`
+#### `return_getAudioSessions`
 ```
-payload = {
+payload = msgId: number, {
   deviceId: string,
   audioSessions: [{
     sessionId: string,
@@ -192,96 +163,63 @@ payload = {
     muted: boolean
   }]
 }
-- Identical to 'update_audioSessions'. Should they be handled the same?
 ```
 
-- `return_setActiveDevice`
+#### `return_setActiveDevice`
 ```
-payload = deviceId: string, newState: boolean
+payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-- `return_setDeviceVolume`
+#### `return_setDeviceVolume`
 ```
-payload = deviceId: string, newVolumePercent: int (0 - 100)
-- Identical to 'update_deviceVolume'. Should they be handled the same?
+payload = msgId: number, deviceId: string, newMuted: boolean, newVolumePercent: int (0 - 100)
 - Supressed if 'setDeviceVolume' is called with 'confirmValueChange = false'
-```
-
-- `return_setDeviceMute`
-```
-payload = deviceId: string, newState: boolean
 ```
 
 ## `WinAudioSession`
 
 ### To helper program
 
-- `receiveSessionPeakValueUpdates`
+#### `receiveSessionPeakValueUpdates`
 ```
-payload = sessionId: string, value: boolean
-```
-
-- `receiveSessionVolumeUpdates`
-```
-payload = sessionId: string, value: boolean
+payload = msgId: number, sessionId: string, value: boolean
 ```
 
-- `receiveSessionMuteUpdates`
+#### `receiveSessionVolumeUpdates`
 ```
-payload = sessionId: string, value: boolean
+payload = msgId: number, sessionId: string, value: boolean
 ```
 
-- `setSessionVolume`
+#### `setSessionVolume`
 ```
-payload = sessionId: string, volumePercent: int (0 - 100), confirmVolumeChange: boolean
+payload = msgId: number, sessionId: string, muted: boolean, volumePercent: int (0 - 100), confirmVolumeChange: boolean
 - 'confirmVolumeChange' supresses 'return_setSessionVolume' if false.
 - This method also does not fire 'update_sessionVolume'.
 ```
 
-- `setSessionMute`
-```
-payload = sessionId: string, value: boolean
-```
-
 ### From helper program
 
-- `return_receiveSessionPeakValueUpdates`
+#### `return_receiveSessionPeakValueUpdates`
 ```
-payload = sessionId: string, newState: boolean
+payload = msgId: number, sessionId: string, newState: boolean
 ```
 
-- `update_sessionPeakValue`
+#### `update_sessionPeakValue`
 ```
 payload = sessionId: string, newPeakValue: float (0 - 1)
 ```
 
-- `return_receiveSessionVolumeUpdates`
+#### `return_receiveSessionVolumeUpdates`
 ```
-payload = sessionId: string, newState: boolean
-```
-
-- `update_sessionVolume`
-```
-payload = sessionId: string, newVolume: int (0 - 100)
+payload = msgId: number, sessionId: string, newState: boolean
 ```
 
-- `return_receiveSessionMuteUpdates`
+#### `update_sessionVolume`
 ```
-payload = sessionId: string, newState: boolean
-```
-
-- `update_sessionMute`
-```
-payload = sessionId: string, newState: boolean
+payload = sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
 ```
 
-- `return_setSessionVolume`
+#### `return_setSessionVolume`
 ```
-payload = sessionId: string, newVolume: int (0 - 100)
-- Identical to `update_sessionPeakValue`. Should they be handled the same?
-```
-
-- `return_setSessionMute`
-```
-payload = sessionId: string, newState: boolean
+payload = msgId: number, sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
 ```
