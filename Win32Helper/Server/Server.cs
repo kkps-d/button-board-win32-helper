@@ -86,7 +86,7 @@ namespace Win32Helper
                         } else
                         {
                             messageNum = int.Parse(message.Substring(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1));
-                            payload = message.Substring(secondCommaIndex + 1);
+                            payload = message.Substring(secondCommaIndex + 1).Trim('\0');
                         }
 
                         Console.WriteLine("[HandleClient] Command: '{0}', MsgNum: {1}, Payload: '{2}'", command, messageNum, payload);
