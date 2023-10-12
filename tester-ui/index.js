@@ -47,19 +47,22 @@ function getMessageNum() {
 io.on("connection", (socket) => {
   console.log("Web UI connected");
 
-  socket.on("winAudio", (message, payload, callback) => {
-    console.log(
-      `Message for 'winAudio': '${message}', ${
-        payload || "no payload"
-      }, '${callback}'`
-    );
+  socket.off("winAudio", socketIoHandlerFunction);
+  socket.on("winAudio", socketIoHandlerFunction);
 
-    sendMessageToHelperAndWait(callback, message, payload);
-  });
-
-  connection.removeListener("data", dataHandlerFunction);
-  connection.on("data", dataHandlerFunction);
+  connection.removeListener("data", helperDataHandlerFunction);
+  connection.on("data", helperDataHandlerFunction);
 });
+
+function socketIoHandlerFunction(message, payload, callback) {
+  console.log(
+    `Message for 'winAudio': '${message}', ${
+      payload || "no payload"
+    }, '${callback}'`
+  );
+
+  sendMessageToHelperAndWait(callback, message, payload);
+}
 
 // What goes in?
 //  The callback, message and payload
@@ -78,7 +81,7 @@ io.on("connection", (socket) => {
 const functionsWaiting = {};
 function sendMessageToHelperAndWait(callback, message, payload) {
   let msgNum = getMessageNum();
-  connection.write(`${message},${msgNum}${payload ? `,${payload}` : ""}`);
+  connection.write(`${message},${msgNum}${payload ? `,${payload}` : ""};`);
   let timeout = setTimeout(() => {
     functionsWaiting[msgNum].callback(null);
     delete functionsWaiting[msgNum];
@@ -86,27 +89,33 @@ function sendMessageToHelperAndWait(callback, message, payload) {
   functionsWaiting[msgNum] = { callback, timeout };
 }
 
-// Data handler does two things:
+// Helper data handler does two things:
 // - Handles return_ data using the explanation above, send just the payload to web ui via callback
 // - Sends update_ data by removing the message number and sending via io.emit
-function dataHandlerFunction(data) {
-  // The returned data is the following format
-  // message,messageNum,payload
-  let dataString = data.toString();
-  let splitData = dataString.split(",");
-  let message = splitData[0];
+function helperDataHandlerFunction(data) {
+  // Split message and filter out empty messages
+  // Empty messages are usually artifacts of splitting single messages
+  // message; = is split into => ['message', '']
+  let messages = data
+    .toString()
+    .split(";")
+    .filter((message) => message.length > 0);
 
-  console.log(splitData);
-  if (message.startsWith("return_")) {
-    let msgNum = Number.parseInt(splitData[1]);
-    let payload = splitData.slice(2).join(",");
-    functionsWaiting[msgNum].callback(payload);
-    clearTimeout(functionsWaiting[msgNum].timeout);
-  } else if (message.startsWith("update_")) {
-    let string = splitData.join(",");
-    io.emit("winAudio", string);
-  } else {
-    console.log("potentially corrupted data");
-    console.log(dataString);
+  for (let message of messages) {
+    let splitMessage = message.split(",");
+    let messageType = splitMessage[0];
+    console.log(messageType);
+
+    if (messageType.startsWith("return_")) {
+      let msgNum = Number.parseInt(splitMessage[1]);
+      let payload = splitMessage.slice(2).join(",");
+      functionsWaiting[msgNum].callback(payload);
+      clearTimeout(functionsWaiting[msgNum].timeout);
+    } else if (messageType.startsWith("update_")) {
+      io.emit("winAudio", message);
+    } else {
+      console.log("potentially corrupted data");
+      console.log(data.toString());
+    }
   }
 }

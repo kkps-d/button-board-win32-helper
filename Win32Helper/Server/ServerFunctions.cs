@@ -135,7 +135,7 @@ namespace Win32Helper
 
             Console.WriteLine("[ReceiveDevicePeakValueUpdates] Returning '{0}'", receiveUpdates);
 
-            WriteToStream(stream, $"return_ReceiveDevicePeakValueUpdates,{messageNum},{deviceId},{receiveUpdates}");
+            WriteToStream(stream, $"return_receiveDevicePeakValueUpdates,{messageNum},{deviceId},{receiveUpdates}");
         }
 
         public static void GetAudioSessions(NetworkStream stream, int messageNum, string payload)
@@ -200,8 +200,6 @@ namespace Win32Helper
 
                     device.RegisterVolumeChangedCallback((bool muted, int volumePercent) =>
                     {
-                        //deviceId: string, newMuted: boolean, newVolumePercent: int(0 - 100)
-                        Console.WriteLine("volume change");
                         WriteToStream(stream, $"update_deviceVolume,{device.Id},{muted},{volumePercent}");
                     });
                 }
@@ -222,7 +220,7 @@ namespace Win32Helper
 
             Console.WriteLine("[ReceiveDeviceVolumeUpdates] Returning '{0}'", receiveUpdates);
 
-            WriteToStream(stream, $"return_ReceiveDeviceVolumeUpdates,{messageNum},{receiveUpdates}");
+            WriteToStream(stream, $"return_receiveDeviceVolumeUpdates,{messageNum},{receiveUpdates}");
         }
 
         private static bool WriteToStream(NetworkStream stream, string data)
@@ -230,7 +228,7 @@ namespace Win32Helper
             if (stream == null) return true;
             if (!stream.CanWrite) return true;
 
-            byte[] buffer = Encoding.ASCII.GetBytes(data);
+            byte[] buffer = Encoding.ASCII.GetBytes(data + ";");
             try
             {
                 stream.WriteAsync(buffer, 0, buffer.Length).Wait();
