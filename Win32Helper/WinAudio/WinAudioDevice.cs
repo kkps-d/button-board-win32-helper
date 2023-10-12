@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Win32Helper.WinAudio
 {
-    internal class Device
+    internal class Device : IDisposable
     {
         private MMDevice device;
 
@@ -68,6 +68,12 @@ namespace Win32Helper.WinAudio
         internal Device(MMDevice mmDevice)
         {
             device = mmDevice;
+        }
+
+        public void Dispose()
+        {
+            UnregisterSessionCreatedCallback();
+            UnregisterVolumeChangedCallback();
         }
 
         internal delegate void volumeChangedCallback(bool muted, int volumePercent);
