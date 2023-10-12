@@ -162,7 +162,7 @@ payload = msgId: number, {
     volumePercent: int (0 - 100),
     muted: boolean
   }]
-}
+} | null
 ```
 
 #### `return_setActiveDevice`
