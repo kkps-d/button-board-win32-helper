@@ -41,7 +41,8 @@ namespace Win32Helper
                 {
                     WinAudio.WinAudio.UnregisterDeviceChangedCallback();
                 }
-            } catch (Exception _)
+            }
+            catch (Exception _)
             {
                 receiveUpdates = !receiveUpdates;
             }
@@ -78,6 +79,63 @@ namespace Win32Helper
             string json = $"[{deviceListString}]";
 
             return json;
+        }
+
+        private static CancellationTokenSource devicePeakValueToken = new CancellationTokenSource();
+        private static async Task SendPeakValue(NetworkStream stream, CancellationToken ct, WinAudio.Device device, int delayMs)
+        {
+            string deviceId = device.Id;
+
+            ct.ThrowIfCancellationRequested();
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+                string message = $"update_devicePeakValue,{deviceId},{device.PeakValue.ToString()}";
+                bool failed = WriteToStream(stream, message);
+                if (failed)
+                {
+                    Console.WriteLine("[SendPeakValue] Failed to write to stream. Aborting task");
+                    break;
+                }
+                await Task.Delay(delayMs);
+            }
+        }
+
+        public static void ReceiveDevicePeakValueUpdates(NetworkStream stream, int messageNum, string payload)
+        {
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            bool receiveUpdates = bool.Parse(splitPayload[1]);
+
+            try
+            {
+                if (receiveUpdates)
+                {
+                    WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+                    if (device == null)
+                    {
+                        Console.WriteLine("[ReceiveDevicePeakValueUpdates] Device with ID '{0}' not found", payload);
+                        throw new Exception("Device not found");
+                    }
+
+                    devicePeakValueToken.Cancel();
+                    devicePeakValueToken = new CancellationTokenSource();
+                    _ = SendPeakValue(stream, devicePeakValueToken.Token, device, 10);
+                }
+                else
+                {
+                    devicePeakValueToken.Cancel();
+                }
+            }
+            catch (Exception _)
+            {
+                devicePeakValueToken.Cancel();
+                receiveUpdates = !receiveUpdates;
+            }
+
+            Console.WriteLine("[ReceiveDevicePeakValueUpdates] Returning '{0}'", receiveUpdates);
+
+            WriteToStream(stream, $"return_ReceiveDevicePeakValueUpdates,{messageNum},{deviceId},{receiveUpdates}");
         }
 
         public static void GetAudioSessions(NetworkStream stream, int messageNum, string payload)
@@ -123,13 +181,66 @@ namespace Win32Helper
             WriteToStream(stream, $"return_getAudioSessions,{messageNum},{json}");
         }
 
-        private static async void WriteToStream(NetworkStream stream, string data)
+        public static void ReceiveDeviceVolumeUpdates(NetworkStream stream, int messageNum, string payload)
         {
-            if (stream == null) return;
-            if (!stream.CanWrite) return;
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            bool receiveUpdates = bool.Parse(splitPayload[1]);
+
+            try
+            {
+                WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+                if (receiveUpdates)
+                {
+                    if (device == null)
+                    {
+                        Console.WriteLine("[ReceiveDeviceVolumeUpdates] Device with ID '{0}' not found", payload);
+                        throw new Exception("Device not found");
+                    }
+
+                    device.RegisterVolumeChangedCallback((bool muted, int volumePercent) =>
+                    {
+                        //deviceId: string, newMuted: boolean, newVolumePercent: int(0 - 100)
+                        Console.WriteLine("volume change");
+                        WriteToStream(stream, $"update_deviceVolume,{device.Id},{muted},{volumePercent}");
+                    });
+                }
+                else
+                {
+                    if (device == null)
+                    {
+                        Console.WriteLine("[ReceiveDeviceVolumeUpdates] Device with ID '{0}' not found", payload);
+                        throw new Exception("Device not found");
+                    }
+                    device?.UnregisterVolumeChangedCallback();
+                }
+            }
+            catch (Exception _)
+            {
+                receiveUpdates = !receiveUpdates;
+            }
+
+            Console.WriteLine("[ReceiveDeviceVolumeUpdates] Returning '{0}'", receiveUpdates);
+
+            WriteToStream(stream, $"return_ReceiveDeviceVolumeUpdates,{messageNum},{receiveUpdates}");
+        }
+
+        private static bool WriteToStream(NetworkStream stream, string data)
+        {
+            if (stream == null) return true;
+            if (!stream.CanWrite) return true;
 
             byte[] buffer = Encoding.ASCII.GetBytes(data);
-            await stream.WriteAsync(buffer, 0, buffer.Length);
+            try
+            {
+                stream.WriteAsync(buffer, 0, buffer.Length).Wait();
+            }
+            catch (Exception ex)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
