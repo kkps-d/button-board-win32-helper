@@ -90,7 +90,7 @@ namespace Win32Helper.WinAudio
         }
         internal int VolumePercent
         {
-            get => (int)(control.SimpleAudioVolume!.MasterVolume * 100);
+            get => (int)Math.Round(control.SimpleAudioVolume!.MasterVolume * 100);
             set => control.SimpleAudioVolume!.MasterVolume = value / 100f;
         }
 
@@ -181,7 +181,7 @@ namespace Win32Helper.WinAudio
 
         private void VolumeChangedCallbackAdapter(object sender, float newVolume, bool newMute)
         {
-            volumeChanged!.Invoke(newMute, (int)(newVolume * 100));
+            volumeChanged!.Invoke(newMute, (int)Math.Round(newVolume * 100));
         }
 
         private string FigureOutFriendlyName()

@@ -25,7 +25,7 @@ namespace Win32Helper.WinAudio
 
         internal int VolumePercent
         {
-            get => (int)(device!.AudioEndpointVolume!.MasterVolumeLevelScalar * 100);
+            get => (int)Math.Round(device!.AudioEndpointVolume!.MasterVolumeLevelScalar * 100);
             set => device.AudioEndpointVolume!.MasterVolumeLevelScalar = value / 100f;
         }
 
@@ -106,7 +106,7 @@ namespace Win32Helper.WinAudio
 
         private void VolumeChangedCallbackAdapter(AudioVolumeNotificationData data)
         {
-            volumeChanged!.Invoke(data.Muted, (int)(data.MasterVolume * 100));
+            volumeChanged!.Invoke(data.Muted, (int)Math.Round(data.MasterVolume * 100));
         }
 
         internal void RegisterSessionCreatedCallback(sessionCreatedCallback callback)
