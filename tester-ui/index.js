@@ -95,15 +95,15 @@ function dataHandlerFunction(data) {
   let dataString = data.toString();
   let splitData = dataString.split(",");
   let message = splitData[0];
-  let msgNum = Number.parseInt(splitData[1]);
-  let payload = splitData.slice(2).join(",");
 
+  console.log(splitData);
   if (message.startsWith("return_")) {
+    let msgNum = Number.parseInt(splitData[1]);
+    let payload = splitData.slice(2).join(",");
     functionsWaiting[msgNum].callback(payload);
     clearTimeout(functionsWaiting[msgNum].timeout);
   } else if (message.startsWith("update_")) {
-    let string = splitData[0] + ",";
-    string += splitData.slice(2).join(",");
+    let string = splitData.join(",");
     io.emit("winAudio", string);
   } else {
     console.log("potentially corrupted data");

@@ -23,6 +23,21 @@ socket.on("connect", () => {
         createSessionElements(sessions);
       }
     );
+
+    socket.emit(
+      "winAudio",
+      "receiveDeviceListUpdates",
+      "true",
+      (payloadUnprocessed) => {
+        if (payloadUnprocessed == null) {
+          console.log(payloadUnprocessed);
+          addLineToTerminal("Error calling receiveDeviceListUpdates");
+          return;
+        }
+
+        addLineToTerminal("receiveDeviceListUpdates: " + payloadUnprocessed);
+      }
+    );
   });
 });
 
@@ -30,6 +45,25 @@ socket.on("winAudio", (message) => {
   const [event, payloadUnprocessed] = splitMessage(message);
 
   switch (event) {
+    case "update_deviceList":
+      const devices = treatPayloadAsJson(payloadUnprocessed);
+      let activeDeviceId = addDevicesToSelector(devices);
+      socket.emit(
+        "winAudio",
+        "getAudioSessions",
+        activeDeviceId,
+        (payloadUnprocessed2) => {
+          if (payloadUnprocessed2 == null) {
+            addLineToTerminal("Error calling getAudioSessions");
+            return;
+          }
+
+          let sessions = treatPayloadAsJson(payloadUnprocessed2);
+          createSessionElements(sessions);
+        }
+      );
+      break;
+
     default:
       break;
   }
