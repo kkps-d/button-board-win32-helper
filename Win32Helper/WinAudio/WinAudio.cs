@@ -10,7 +10,9 @@ namespace Win32Helper.WinAudio
     internal class WinAudio
     {
         private static MMDeviceEnumerator mmDeviceEnum = new MMDeviceEnumerator(Guid.NewGuid());
-        private static MMNotificationClient notificationClient = new MMNotificationClient(mmDeviceEnum); 
+        private static MMNotificationClient notificationClient = new MMNotificationClient(mmDeviceEnum);
+
+        private static List<Device> devices = new List<Device>();
 
         internal static Device DefaultOutputDevice
         {
@@ -21,15 +23,18 @@ namespace Win32Helper.WinAudio
         {
             get
             {
-                List<Device> devices = new List<Device>();
-
-                // Get a collection of multimedia device resources
-                MMDeviceCollection mmDeviceCollection = mmDeviceEnum.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-
-                // Create new WinAudioDevices from the collection
-                foreach (MMDevice device in mmDeviceCollection)
+                if (devices.Count <= 0)
                 {
-                    devices.Add(new Device(device));
+                    devices = new List<Device>();
+
+                    // Get a collection of multimedia device resources
+                    MMDeviceCollection mmDeviceCollection = mmDeviceEnum.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+
+                    // Create new WinAudioDevices from the collection
+                    foreach (MMDevice device in mmDeviceCollection)
+                    {
+                        devices.Add(new Device(device));
+                    }
                 }
 
                 return devices;
@@ -57,6 +62,21 @@ namespace Win32Helper.WinAudio
 
         private static void DeviceChangedCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
         {
+            // Regenerate the devices list
+            foreach (Device device in devices)
+            {
+                device.Dispose();
+            }
+            //Console.WriteLine("devices disposed: {0}", devices.Count);
+
+            devices.Clear();
+            //Console.WriteLine("list cleared: {0}", devices.Count);
+
+            // The list will probably get regenerated when outputdevices are get.
+            // If something explodes, try uncommenting this out first
+            //_ = OutputDevices;
+            //Console.WriteLine("list regenerated: {0}", devices.Count);
+
             defaultDeviceChanged?.Invoke(args);
         }
     }
