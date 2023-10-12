@@ -2,8 +2,27 @@ socket.on("connect", () => {
   addLineToTerminal("Connected to web server");
 
   socket.emit("winAudio", "getOutputDevices", "", (payloadUnprocessed) => {
+    if (payloadUnprocessed == null) {
+      console.log(payloadUnprocessed);
+      addLineToTerminal("Error calling getOutputDevices");
+      return;
+    }
     const devices = treatPayloadAsJson(payloadUnprocessed);
-    addDevicesToSelector(devices);
+    let activeDeviceId = addDevicesToSelector(devices);
+    socket.emit(
+      "winAudio",
+      "getAudioSessions",
+      activeDeviceId,
+      (payloadUnprocessed2) => {
+        if (payloadUnprocessed2 == null) {
+          addLineToTerminal("Error calling getAudioSessions");
+          return;
+        }
+
+        let sessions = treatPayloadAsJson(payloadUnprocessed2);
+        createSessionElements(sessions);
+      }
+    );
   });
 });
 

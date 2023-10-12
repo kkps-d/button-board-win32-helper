@@ -17,11 +17,12 @@ function addDevicesToSelector(devices) {
     if (device.selected) {
       activeDeviceId = device.deviceId;
       deviceOption.selected = true;
-      deviceVolInput.value = device.volumePercent;
-      deviceVolIndicator.innerText = device.volumePercent;
+      deviceVolInput.value = `${device.volumePercent}`;
+      deviceVolIndicator.innerText = `${device.volumePercent}`;
     }
     deviceSelect.appendChild(deviceOption);
   }
+  return activeDeviceId;
 }
 
 // Terminal

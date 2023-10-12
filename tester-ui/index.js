@@ -1,8 +1,25 @@
+const path = require("node:path");
 const express = require("express");
 const { createServer } = require("node:http");
 const app = express();
 const server = createServer(app);
 app.use(express.static("public"));
+app.use(
+  "/icons",
+  express.static(
+    path.join(
+      __dirname,
+      "..",
+      "Win32Helper",
+      "bin",
+      "Debug",
+      "net6.0-windows10.0.17763.0",
+      "resources"
+    )
+  )
+);
+
+// ("../Win32Helper/bin/Debug/net6.0-windows10.0.17763.0/resources");
 
 const { Server } = require("socket.io");
 const io = new Server(server);
