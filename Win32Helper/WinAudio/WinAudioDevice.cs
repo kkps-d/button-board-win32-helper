@@ -11,6 +11,7 @@ namespace Win32Helper.WinAudio
     internal class Device : IDisposable
     {
         private MMDevice device;
+        private List<Session> sessions = new List<Session>();
 
         internal string FriendlyName
         {
@@ -49,16 +50,19 @@ namespace Win32Helper.WinAudio
         {
             get
             {
-                List<Session> sessions = new List<Session>();
-
-                // Enumerate the audio sessions
-                device!.AudioSessionManager2!.RefreshSessions();
-
-                var audioSessionControl2Collection = device!.AudioSessionManager2!.Sessions;
-
-                foreach (var audioSesionControl2 in audioSessionControl2Collection!)
+                if (sessions.Count <= 0)
                 {
-                    sessions.Add(new Session(audioSesionControl2));
+                    sessions = new List<Session>();
+
+                    // Enumerate the audio sessions
+                    device!.AudioSessionManager2!.RefreshSessions();
+
+                    var audioSessionControl2Collection = device!.AudioSessionManager2!.Sessions;
+
+                    foreach (var audioSesionControl2 in audioSessionControl2Collection!)
+                    {
+                        sessions.Add(new Session(audioSesionControl2));
+                    }
                 }
 
                 return sessions;
@@ -123,6 +127,13 @@ namespace Win32Helper.WinAudio
 
         private void SessionCreatedCallbackAdapter(object sender, IAudioSessionControl2 newSession)
         {
+            foreach (Session session in sessions)
+            {
+                session.Dispose();
+            }
+
+            sessions.Clear();
+
             sessionCreated!.Invoke(AudioSessions);
         }
     }

@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 
 namespace Win32Helper.WinAudio
 {
-    internal class Session
+    internal class Session : IDisposable
     {
         internal enum InvalidationReason
         {
@@ -113,6 +113,14 @@ namespace Win32Helper.WinAudio
             control.OnStateChanged += SessionStateChangeCallbackAdapter;
 
             control.OnSessionDisconnected += SessionDisconnectCallbackAdapter;
+        }
+
+        public void Dispose()
+        {
+            UnregisterSessionInvalidatedCallback();
+            UnregisterVolumeChangedCallback();
+            control.OnStateChanged -= SessionStateChangeCallbackAdapter;
+            control.OnSessionDisconnected -= SessionDisconnectCallbackAdapter;
         }
 
         internal delegate void sessionInvalidatedCallback(InvalidationReason reason);
