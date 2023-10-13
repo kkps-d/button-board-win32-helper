@@ -138,49 +138,6 @@ namespace Win32Helper
             WriteToStream(stream, $"return_receiveDevicePeakValueUpdates,{messageNum},{deviceId},{receiveUpdates}");
         }
 
-        public static void GetAudioSessions(NetworkStream stream, int messageNum, string payload)
-        {
-            WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == payload);
-
-            if (device == null)
-            {
-                // Return payload to be null if device is not found
-                Console.WriteLine("[GetAudioSessions] Device with ID '{0}' not found", payload);
-                WriteToStream(stream, $"return_getAudioSessions,{messageNum},null");
-                return;
-            };
-
-            List<WinAudio.Session> sessions = device.AudioSessions;
-
-            string sessionListString = "";
-
-            foreach (WinAudio.Session session in sessions)
-            {
-                string sessionId = session.Id;
-                string friendlyName = session.FriendlyName;
-                string iconPath = session.IconPath.Replace("\\", "\\\\");
-                string volumePercent = session.VolumePercent.ToString();
-                string muted = session.Muted ? "true" : "false";
-
-                sessionListString += $"{{" +
-                    $"\"sessionId\": \"{sessionId}\"," +
-                    $"\"friendlyName\": \"{friendlyName}\"," +
-                    $"\"iconPath\": \"{iconPath}\"," +
-                    $"\"volumePercent\": {volumePercent}," +
-                    $"\"muted\": {muted}" +
-                $"}},";
-            }
-
-            // Remove final comma
-            sessionListString = sessionListString.Substring(0, sessionListString.Length - 1);
-
-            string json = $"[{sessionListString}]";
-
-            Console.WriteLine("[GetAudioSessions] Returning '{0}'", json);
-
-            WriteToStream(stream, $"return_getAudioSessions,{messageNum},{json}");
-        }
-
         public static void ReceiveDeviceVolumeUpdates(NetworkStream stream, int messageNum, string payload)
         {
             string[] splitPayload = payload.Split(',');
@@ -222,6 +179,91 @@ namespace Win32Helper
 
             WriteToStream(stream, $"return_receiveDeviceVolumeUpdates,{messageNum},{receiveUpdates}");
         }
+
+        public static void ReceiveAudioSessionUpdates(NetworkStream stream, int messageNum, string payload)
+        {
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            bool receiveUpdates = bool.Parse(splitPayload[1]);
+
+            try
+            {
+                WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+
+                if (device == null)
+                {
+                    Console.WriteLine("[ReceiveAudioSessionUpdates] Device with ID '{0}' not found", payload);
+                    throw new Exception("Device not found");
+                }
+
+                if (receiveUpdates)
+                {
+                    device.RegisterSessionCreatedCallback((List<Session> sessions) =>
+                    {
+                        string json = GetSessionListAsJson(sessions);
+                        WriteToStream(stream, $"update_audioSessions,{deviceId},{json}");
+                    });
+                } else
+                {
+                    device.UnregisterSessionCreatedCallback();
+                }
+            } catch (Exception _)
+            {
+                receiveUpdates = !receiveUpdates;
+            }
+
+            WriteToStream(stream, $"return_receiveAudioSessionUpdates,{messageNum},{deviceId},{receiveUpdates}");
+        }
+        
+        public static void GetAudioSessions(NetworkStream stream, int messageNum, string payload)
+        {
+            WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == payload);
+
+            if (device == null)
+            {
+                // Return payload to be null if device is not found
+                Console.WriteLine("[GetAudioSessions] Device with ID '{0}' not found", payload);
+                WriteToStream(stream, $"return_getAudioSessions,{messageNum},null");
+                return;
+            };
+
+            string json = GetSessionListAsJson(device.AudioSessions);
+
+            Console.WriteLine("[GetAudioSessions] Returning '{0}'", json);
+
+            WriteToStream(stream, $"return_getAudioSessions,{messageNum},{json}");
+        }
+
+        private static string GetSessionListAsJson(List<WinAudio.Session> sessions)
+        {
+            string sessionListString = "";
+
+            foreach (WinAudio.Session session in sessions)
+            {
+                string sessionId = session.Id;
+                string friendlyName = session.FriendlyName;
+                string iconPath = session.IconPath.Replace("\\", "\\\\");
+                string volumePercent = session.VolumePercent.ToString();
+                string muted = session.Muted ? "true" : "false";
+
+                sessionListString += $"{{" +
+                    $"\"sessionId\": \"{sessionId}\"," +
+                    $"\"friendlyName\": \"{friendlyName}\"," +
+                    $"\"iconPath\": \"{iconPath}\"," +
+                    $"\"volumePercent\": {volumePercent}," +
+                    $"\"muted\": {muted}" +
+                $"}},";
+            }
+
+            // Remove final comma
+            sessionListString = sessionListString.Substring(0, sessionListString.Length - 1);
+
+            string json = $"[{sessionListString}]";
+
+            return json;
+        }
+        
+        // @TODO NEXT STEPS, SESSION VOLUME CHANGES, PEAK METERS AND INVALIDATIONS!
 
         private static bool WriteToStream(NetworkStream stream, string data)
         {

@@ -15,8 +15,6 @@ class SessionElement {
       this[key] = value;
     }
 
-    console.log(session);
-
     this.socket = socket;
 
     this.sessionBarDiv = document.createElement("div");
