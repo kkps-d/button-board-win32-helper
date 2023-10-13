@@ -19,8 +19,6 @@ app.use(
   )
 );
 
-// ("../Win32Helper/bin/Debug/net6.0-windows10.0.17763.0/resources");
-
 const { Server } = require("socket.io");
 const io = new Server(server);
 
@@ -104,7 +102,6 @@ function helperDataHandlerFunction(data) {
   for (let message of messages) {
     let splitMessage = message.split(",");
     let messageType = splitMessage[0];
-    console.log(messageType);
 
     if (messageType.startsWith("return_")) {
       let msgNum = Number.parseInt(splitMessage[1]);
