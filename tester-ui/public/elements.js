@@ -15,10 +15,12 @@ function addDevicesToSelector(devices) {
     deviceOption.innerText = device.friendlyName;
     deviceOption.value = device.deviceId;
     if (device.selected) {
+      deviceOption.innerText = `⭐ ${device.friendlyName}`;
       activeDeviceId = device.deviceId;
       deviceOption.selected = true;
       deviceVolInput.value = `${device.volumePercent}`;
       deviceVolIndicator.innerText = `${device.volumePercent}`;
+      muteDeviceBtn.innerText = device.muted ? "🔇" : "🔊";
     }
     deviceSelect.appendChild(deviceOption);
   }

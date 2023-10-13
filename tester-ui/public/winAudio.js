@@ -1,6 +1,10 @@
 function onReceiveDeviceList(payloadUnprocessed) {
   const devices = treatPayloadAsJson(payloadUnprocessed);
   let activeDeviceId = addDevicesToSelector(devices);
+  registerAllEventsForDevice(activeDeviceId);
+}
+
+function registerAllEventsForDevice(activeDeviceId) {
   socket.emit(
     "winAudio",
     "getAudioSessions",
@@ -98,17 +102,25 @@ socket.on("winAudio", (message) => {
     case "update_deviceList":
       onReceiveDeviceList(payloadUnprocessed);
       addLineToTerminal("updated devices");
+      console.log("updated devices");
       break;
 
     case "update_devicePeakValue":
-      const peakValue = treatPayloadAsCsv(payloadUnprocessed)[1];
-      devicePeakMeterBar.style.width = `${peakValue * 100}%`;
+      const [updatedDeviceId, peakValue] =
+        treatPayloadAsCsv(payloadUnprocessed);
+      if (updatedDeviceId == deviceSelect.value) {
+        devicePeakMeterBar.style.width = `${peakValue * 100}%`;
+      }
       break;
 
     case "update_deviceVolume":
-      const volume = treatPayloadAsCsv(payloadUnprocessed)[2];
-      deviceVolInput.value = Number.parseInt(volume);
-      deviceVolIndicator.innerHTML = volume;
+      const [updatedDeviceId2, muted, volume] =
+        treatPayloadAsCsv(payloadUnprocessed);
+      if (updatedDeviceId2 == deviceSelect.value) {
+        deviceVolInput.value = Number.parseInt(volume);
+        deviceVolIndicator.innerHTML = volume;
+        muteDeviceBtn.innerText = muted == "True" ? "🔇" : "🔊";
+      }
       break;
 
     case "update_audioSessions":
@@ -128,6 +140,46 @@ socket.on("winAudio", (message) => {
     default:
       break;
   }
+});
+
+activateDeviceBtn.addEventListener("click", () => {
+  socket.emit(
+    "winAudio",
+    "setActiveDevice",
+    deviceSelect.value,
+    (payloadUnprocessed) => {
+      if (payloadUnprocessed == null) {
+        console.log(payloadUnprocessed);
+        addLineToTerminal("Error calling setActiveDevice");
+        return;
+      }
+
+      addLineToTerminal("setActiveDevice: " + payloadUnprocessed);
+    }
+  );
+});
+
+deviceSelect.addEventListener("change", () => {
+  socket.emit("winAudio", "getOutputDevices", "", (payloadUnprocessed) => {
+    if (payloadUnprocessed == null) {
+      console.log(payloadUnprocessed);
+      addLineToTerminal("Error calling getOutputDevices");
+      return;
+    }
+
+    const devices = treatPayloadAsJson(payloadUnprocessed);
+    const device = devices.find(
+      (device) => device.deviceId == deviceSelect.value
+    );
+
+    registerAllEventsForDevice(device.deviceId);
+
+    deviceVolInput.value = `${device.volumePercent}`;
+    deviceVolIndicator.innerText = `${device.volumePercent}`;
+    console.log(device);
+    muteDeviceBtn.innerText = device.muted ? "🔇" : "🔊";
+    console.log(device.deviceId);
+  });
 });
 
 function splitMessage(message) {
