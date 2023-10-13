@@ -62,22 +62,29 @@ namespace Win32Helper.WinAudio
 
         private static void DeviceChangedCallbackAdapter(object? sender, DefaultDeviceChangedEventArgs args)
         {
-            // Regenerate the devices list
-            foreach (Device device in devices)
+            // WARNING: DEVICE CHANGE CALLBACK IS NOW ONLY LISTENING FOR CONSOLE DEVICE CHANGES
+            // MAY NEED TO CHANGE THIS IN THE FUTURE
+            // https://learn.microsoft.com/en-us/windows/win32/coreaudio/device-roles
+            if (args.Role == Role.Console)
             {
-                device.Dispose();
+
+                // Regenerate the devices list
+                foreach (Device device in devices)
+                {
+                    device.Dispose();
+                }
+                //Console.WriteLine("devices disposed: {0}", devices.Count);
+
+                devices.Clear();
+                //Console.WriteLine("list cleared: {0}", devices.Count);
+
+                // The list will probably get regenerated when outputdevices are get.
+                // If something explodes, try uncommenting this out first
+                //_ = OutputDevices;
+                //Console.WriteLine("list regenerated: {0}", devices.Count);
+
+                defaultDeviceChanged?.Invoke(args);
             }
-            //Console.WriteLine("devices disposed: {0}", devices.Count);
-
-            devices.Clear();
-            //Console.WriteLine("list cleared: {0}", devices.Count);
-
-            // The list will probably get regenerated when outputdevices are get.
-            // If something explodes, try uncommenting this out first
-            //_ = OutputDevices;
-            //Console.WriteLine("list regenerated: {0}", devices.Count);
-
-            defaultDeviceChanged?.Invoke(args);
         }
     }
 }
