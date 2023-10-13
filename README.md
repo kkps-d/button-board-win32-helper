@@ -36,18 +36,18 @@ The port can be configured by editing the `helperPort` property in `buttonboard-
 
 ### To helper program
 
-#### `getOutputDevices`
+#### `getOutputDevices` ✅
 ```
 payload = msgId: number
 ```
 
-#### `receiveDeviceListUpdates`
+#### `receiveDeviceListUpdates` ✅
 ```
 payload = msgId: number, value: boolean
 ```
 
 ### From helper program
-#### `return_getOutputDevices`
+#### `return_getOutputDevices` ✅
 ```
 payload = msgId: number, [{
   deviceId: string,
@@ -58,12 +58,12 @@ payload = msgId: number, [{
 }]
 ```
 
-#### `return_receiveDeviceListUpdates`
+#### `return_receiveDeviceListUpdates` ✅
 ```
 payload = msgId: number, newState: boolean
 ```
 
-#### `update_deviceList`
+#### `update_deviceList` ✅
 ```
 payload = [{
   deviceId: string,
@@ -78,22 +78,22 @@ payload = [{
 
 ### To helper program
 
-#### `receiveDevicePeakValueUpdates`
+#### `receiveDevicePeakValueUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, value: boolean
 ```
 
-#### `receiveDeviceVolumeUpdates`
+#### `receiveDeviceVolumeUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, value: boolean
 ```
 
-#### `receiveAudioSessionUpdates`
+#### `receiveAudioSessionUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, value: boolean
 ```
 
-#### `getAudioSessions`
+#### `getAudioSessions` ✅
 ```
 payload = msgId: number, deviceId: string
 ```
@@ -112,57 +112,51 @@ payload = msgId: number, deviceId: string, muted: boolean, volumePercent: int (0
 
 ### From helper program
 
-#### `return_receiveDevicePeakValueUpdates`
+#### `return_receiveDevicePeakValueUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-#### `update_devicePeakValue`
+#### `update_devicePeakValue` ✅
 ```
 payload = deviceId: string, newPeakValue: float (0 - 1)
 ```
 
-#### `return_receiveDeviceVolumeUpdates`
+#### `return_receiveDeviceVolumeUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-#### `update_deviceVolume`
+#### `update_deviceVolume` ✅
 ```
 payload = deviceId: string, newMuted: boolean, newVolumePercent: int (0 - 100)
 ```
 
-#### `return_receiveAudioSessionUpdates`
+#### `return_receiveAudioSessionUpdates` ✅
 ```
 payload = msgId: number, deviceId: string, newState: boolean
 ```
 
-#### `update_audioSessions`
+#### `update_audioSessions` ✅
 ```
-payload = {
-  deviceId: string,
-  audioSessions: [{
-    sessionId: string,
-    friendlyName: string,
-    iconPath: string | null,
-    volumePercent: int (0 - 100),
-    muted: boolean
-  }]
-}
+payload = deviceId: string, [{
+  sessionId: string,
+  friendlyName: string,
+  iconPath: string | null,
+  volumePercent: int (0 - 100),
+  muted: boolean
+}]
 ```
 
-#### `return_getAudioSessions`
+#### `return_getAudioSessions` ✅
 ```
-payload = msgId: number, {
-  deviceId: string,
-  audioSessions: [{
-    sessionId: string,
-    friendlyName: string,
-    iconPath: string | null,
-    volumePercent: int (0 - 100),
-    muted: boolean
-  }]
-} | null
+payload = [{
+  sessionId: string,
+  friendlyName: string,
+  iconPath: string | null,
+  volumePercent: int (0 - 100),
+  muted: boolean
+}] | null
 ```
 
 #### `return_setActiveDevice`
