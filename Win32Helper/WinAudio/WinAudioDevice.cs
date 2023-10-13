@@ -61,7 +61,14 @@ namespace Win32Helper.WinAudio
 
                     foreach (var audioSesionControl2 in audioSessionControl2Collection!)
                     {
-                        sessions.Add(new Session(audioSesionControl2));
+                        Session session = new Session(audioSesionControl2);
+                        // Calls the session created callback if a session is invalidated.
+                        // Easy way to use the callback as more of a session change
+                        session.RegisterSessionInvalidatedCallback((Session.InvalidationReason reason) =>
+                        {
+                            SessionCreatedCallbackAdapter(null, null);
+                        });
+                        sessions.Add(session);
                     }
                 }
 
@@ -100,14 +107,13 @@ namespace Win32Helper.WinAudio
             volumeChanged = null;
         }
 
-
-        internal delegate void sessionCreatedCallback(List<Session> sessions);
-        private sessionCreatedCallback? sessionCreated = null;
-
         private void VolumeChangedCallbackAdapter(AudioVolumeNotificationData data)
         {
             volumeChanged!.Invoke(data.Muted, (int)Math.Round(data.MasterVolume * 100));
         }
+
+        internal delegate void sessionCreatedCallback(List<Session> sessions);
+        private sessionCreatedCallback? sessionCreated = null;
 
         internal void RegisterSessionCreatedCallback(sessionCreatedCallback callback)
         {
