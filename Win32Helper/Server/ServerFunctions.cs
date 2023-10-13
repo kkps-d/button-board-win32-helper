@@ -263,6 +263,29 @@ namespace Win32Helper
             return json;
         }
         
+        public static void SetActiveDevice(NetworkStream stream, int messageNum, string payload)
+        {
+            WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == payload);
+            WinAudio.Device defaultDevice = WinAudio.WinAudio.DefaultOutputDevice;
+
+            if (device == null)
+            {
+                // Return payload to be null if device is not found
+                Console.WriteLine("[SetActiveDevice] Device with ID '{0}' not found", payload);
+                WriteToStream(stream, $"return_setActiveDevice,{messageNum},{defaultDevice.Id}");
+                return;
+            };
+
+            if (defaultDevice.Id == device.Id)
+            {
+                Console.WriteLine("[SetActiveDevice] Device '{0}' is already default!", device.FriendlyName);
+            } else
+            {
+                device.Selected = true;
+            }
+
+            WriteToStream(stream, $"return_setActiveDevice,{messageNum},{payload}");
+        }
         // @TODO NEXT STEPS, SESSION VOLUME CHANGES, PEAK METERS AND INVALIDATIONS!
 
         private static bool WriteToStream(NetworkStream stream, string data)
