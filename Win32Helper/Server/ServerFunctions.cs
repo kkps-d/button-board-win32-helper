@@ -203,18 +203,20 @@ namespace Win32Helper
                         string json = GetSessionListAsJson(sessions);
                         WriteToStream(stream, $"update_audioSessions,{deviceId},{json}");
                     });
-                } else
+                }
+                else
                 {
                     device.UnregisterSessionCreatedCallback();
                 }
-            } catch (Exception _)
+            }
+            catch (Exception _)
             {
                 receiveUpdates = !receiveUpdates;
             }
 
             WriteToStream(stream, $"return_receiveAudioSessionUpdates,{messageNum},{deviceId},{receiveUpdates}");
         }
-        
+
         public static void GetAudioSessions(NetworkStream stream, int messageNum, string payload)
         {
             WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == payload);
@@ -262,7 +264,7 @@ namespace Win32Helper
 
             return json;
         }
-        
+
         public static void SetActiveDevice(NetworkStream stream, int messageNum, string payload)
         {
             WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == payload);
@@ -279,12 +281,41 @@ namespace Win32Helper
             if (defaultDevice.Id == device.Id)
             {
                 Console.WriteLine("[SetActiveDevice] Device '{0}' is already default!", device.FriendlyName);
-            } else
+            }
+            else
             {
                 device.Selected = true;
             }
 
             WriteToStream(stream, $"return_setActiveDevice,{messageNum},{payload}");
+        }
+
+        public static void SetDeviceVolume(NetworkStream stream, int messageNum, string payload)
+        {
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            bool muted = bool.Parse(splitPayload[1]);
+            int newVolume = int.Parse(splitPayload[2]);
+            bool confirmVolumeChanges = bool.Parse(splitPayload[3]);
+
+            WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+
+            if (device == null)
+            {
+                Console.WriteLine("[SetDeviceVolume] Device with ID '{0}' not found", deviceId);
+                if (confirmVolumeChanges)
+                {
+                    WriteToStream(stream, $"return_setActiveDevice,{messageNum},null");
+                }
+            }
+
+            device.VolumePercent = newVolume;
+            device.Muted = muted;
+
+            if (confirmVolumeChanges)
+            {
+                WriteToStream(stream, $"return_setActiveDevice,{messageNum},{payload}");
+            }
         }
         // @TODO NEXT STEPS, SESSION VOLUME CHANGES, PEAK METERS AND INVALIDATIONS!
 
@@ -307,3 +338,4 @@ namespace Win32Helper
         }
     }
 }
+

@@ -182,6 +182,46 @@ deviceSelect.addEventListener("change", () => {
   });
 });
 
+deviceVolInput.addEventListener("input", () => {
+  changeDeviceMuteOrVolume(false);
+});
+
+muteDeviceBtn.addEventListener("click", () => {
+  switch (muteDeviceBtn.innerText) {
+    case "🔊":
+      muteDeviceBtn.innerText = "🔇";
+      break;
+    case "🔇":
+      muteDeviceBtn.innerText = "🔊";
+      break;
+  }
+  changeDeviceMuteOrVolume(false);
+});
+
+function changeDeviceMuteOrVolume(confirmVolumeChange = true) {
+  const newVol = deviceVolInput.value;
+  deviceVolIndicator.innerText = newVol;
+
+  socket.emit(
+    "winAudio",
+    "setDeviceVolume",
+    `${deviceSelect.value},${
+      muteDeviceBtn.innerText == "🔇"
+    },${newVol},${confirmVolumeChange}`,
+    (payloadUnprocessed) => {
+      if (confirmVolumeChange) {
+        if (payloadUnprocessed == null) {
+          console.log(payloadUnprocessed);
+          addLineToTerminal("Error calling getOutputDevices");
+          return;
+        }
+
+        addLineToTerminal("setDeviceVolume: " + payloadUnprocessed);
+      }
+    }
+  );
+}
+
 function splitMessage(message) {
   const firstComma = message.indexOf(",");
   const event = message.slice(0, firstComma);
