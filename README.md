@@ -98,7 +98,7 @@ payload = msgId: number, deviceId: string, value: boolean
 payload = msgId: number, deviceId: string
 ```
 
-#### `setActiveDevice`
+#### `setActiveDevice` ✅
 ```
 payload = msgId: number, deviceId: string
 ```
@@ -159,9 +159,9 @@ payload = [{
 }] | null
 ```
 
-#### `return_setActiveDevice`
+#### `return_setActiveDevice` ✅
 ```
-payload = msgId: number, deviceId: string, newState: boolean
+payload = msgId: number, currentActiveDeviceId: string
 ```
 
 #### `return_setDeviceVolume`
