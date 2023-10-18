@@ -11,6 +11,7 @@ namespace Win32Helper
 {
     internal class ServerFunctions
     {
+        #region WinAudio
         public static void GetOutputDevices(NetworkStream stream, int messageNum, string payload)
         {
             string json = GetDeviceListAsJson(WinAudio.WinAudio.OutputDevices);
@@ -51,7 +52,7 @@ namespace Win32Helper
 
             WriteToStream(stream, $"return_receiveDeviceListUpdates,{messageNum},{receiveUpdates}");
         }
-
+        
         private static string GetDeviceListAsJson(List<WinAudio.Device> devices)
         {
             string deviceListString = "";
@@ -80,7 +81,9 @@ namespace Win32Helper
 
             return json;
         }
+        #endregion
 
+        #region WinAudioDevice
         private static CancellationTokenSource devicePeakValueToken = new CancellationTokenSource();
         private static async Task SendPeakValue(NetworkStream stream, CancellationToken ct, WinAudio.Device device, int delayMs)
         {
@@ -305,8 +308,9 @@ namespace Win32Helper
                 Console.WriteLine("[SetDeviceVolume] Device with ID '{0}' not found", deviceId);
                 if (confirmVolumeChanges)
                 {
-                    WriteToStream(stream, $"return_setActiveDevice,{messageNum},null");
+                    WriteToStream(stream, $"return_setDeviceVolume,{messageNum},null");
                 }
+                return;
             }
 
             device.VolumePercent = newVolume;
@@ -314,11 +318,123 @@ namespace Win32Helper
 
             if (confirmVolumeChanges)
             {
-                WriteToStream(stream, $"return_setActiveDevice,{messageNum},{payload}");
+                WriteToStream(stream, $"return_setDeviceVolume,{messageNum},{payload}");
             }
         }
-        // @TODO NEXT STEPS, SESSION VOLUME CHANGES, PEAK METERS AND INVALIDATIONS!
+        #endregion
 
+        #region WinAudioSession
+        // @TODO NEXT STEPS, PEAK METERS!
+        public static void ReceiveSessionPeakValueUpdates(NetworkStream stream, int messageNum, string payload)
+        {
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            string sessionId = splitPayload[1];
+            bool receiveUpdates = bool.Parse(splitPayload[2]);
+
+            try
+            {
+                if (receiveUpdates)
+                {
+                    WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+                    if (device == null)
+                    {
+                        Console.WriteLine("[ReceiveDevicePeakValueUpdates] Device with ID '{0}' not found", payload);
+                        throw new Exception("Device not found");
+                    }
+
+                    WinAudio.Session? session = device.AudioSessions.Find(session => session.Id == sessionId);
+
+                    if (session == null)
+                    {
+                        Console.WriteLine("[SetSessionVolume] Session with ID '{0}' not found on device with ID '{1}'", sessionId, deviceId);
+                        throw new Exception("Session not found");
+                    }
+
+                    session.RegisterPeakValueUpdateCallback((float peakValue) => {
+                        WriteToStream(stream, $"update_sessionPeakValue,{deviceId},{sessionId},{peakValue}");
+                    }, 10);
+                }
+                else
+                {
+                    WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+                    if (device == null)
+                    {
+                        Console.WriteLine("[ReceiveDevicePeakValueUpdates] Device with ID '{0}' not found", payload);
+                        throw new Exception("Device not found");
+                    }
+
+                    WinAudio.Session? session = device.AudioSessions.Find(session => session.Id == sessionId);
+
+                    if (session == null)
+                    {
+                        Console.WriteLine("[SetSessionVolume] Session with ID '{0}' not found on device with ID '{1}'", sessionId, deviceId);
+                        throw new Exception("Session not found");
+                    }
+
+                    session.UnregisterPeakValueUpdateCallback();
+                }
+            }
+            catch (Exception _)
+            {
+                receiveUpdates = !receiveUpdates;
+            }
+
+            Console.WriteLine("[ReceiveDevicePeakValueUpdates] Returning '{0}'", receiveUpdates);
+
+            WriteToStream(stream, $"return_receiveDevicePeakValueUpdates,{messageNum},{deviceId},{receiveUpdates}");
+        }
+
+        public static void ReceiveSessionVolumeUpdates(NetworkStream stream, int messageNum, string payload)
+        {
+            Console.WriteLine("[ReceiveSessionVolumeUpdates] Unimplemented");
+        }
+
+        public static void SetSessionVolume(NetworkStream stream, int messageNum, string payload)
+        {
+            string[] splitPayload = payload.Split(',');
+            string deviceId = splitPayload[0];
+            string sessionId = splitPayload[1];
+            bool muted = bool.Parse(splitPayload[2]);
+            int newVolume = int.Parse(splitPayload[3]);
+            bool confirmVolumeChanges = bool.Parse(splitPayload[4]);
+
+            WinAudio.Device? device = WinAudio.WinAudio.OutputDevices.Find(device => device.Id == deviceId);
+
+            if (device == null)
+            {
+                Console.WriteLine("[SetSessionVolume] Device with ID '{0}' not found", deviceId);
+                if (confirmVolumeChanges)
+                {
+                    WriteToStream(stream, $"return_setSessionVolume,{messageNum},null");
+                }
+                return;
+            }
+
+            WinAudio.Session? session = device.AudioSessions.Find(session => session.Id == sessionId);
+
+            if (session == null)
+            {
+                Console.WriteLine("[SetSessionVolume] Session with ID '{0}' not found on device with ID '{1}'", sessionId, deviceId);
+                if (confirmVolumeChanges)
+                {
+                    WriteToStream(stream, $"return_setSessionVolume,{messageNum},null");
+                }
+                return;
+            }
+
+            session.VolumePercent = newVolume;
+            session.Muted = muted;
+
+            if (confirmVolumeChanges)
+            {
+                WriteToStream(stream, $"return_setSessionVolume,{messageNum},{payload}");
+            }
+        }
+
+        #endregion
+
+        // Returns whether there is an error or not
         private static bool WriteToStream(NetworkStream stream, string data)
         {
             if (stream == null) return true;

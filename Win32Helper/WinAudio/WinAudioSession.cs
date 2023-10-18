@@ -119,6 +119,7 @@ namespace Win32Helper.WinAudio
         {
             UnregisterSessionInvalidatedCallback();
             UnregisterVolumeChangedCallback();
+            UnregisterPeakValueUpdateCallback();
             control.OnStateChanged -= SessionStateChangeCallbackAdapter;
             control.OnSessionDisconnected -= SessionDisconnectCallbackAdapter;
         }
@@ -182,6 +183,37 @@ namespace Win32Helper.WinAudio
         private void VolumeChangedCallbackAdapter(object sender, float newVolume, bool newMute)
         {
             volumeChanged!.Invoke(newMute, (int)Math.Round(newVolume * 100));
+        }
+
+        internal delegate void peakValueUpdateCallback(float peakValue);
+        private peakValueUpdateCallback? peakValueUpdate = null;
+        private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        internal void RegisterPeakValueUpdateCallback(peakValueUpdateCallback callback, int delayMs)
+        {
+            UnregisterPeakValueUpdateCallback();
+
+            peakValueUpdate = callback;
+            tokenSource = new CancellationTokenSource();
+            _ = UpdatePeakValue(tokenSource.Token, this, callback, delayMs);
+        }
+
+        internal void UnregisterPeakValueUpdateCallback()
+        {
+            tokenSource.Cancel();
+            peakValueUpdate = null;
+        }
+
+        private static async Task UpdatePeakValue(CancellationToken ct, Session session, peakValueUpdateCallback callback, int delayMs)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+                callback.Invoke(session.PeakValue);
+                await Task.Delay(delayMs);
+            }
+
         }
 
         private string FigureOutFriendlyName()
