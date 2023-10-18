@@ -103,7 +103,7 @@ payload = msgId: number, deviceId: string
 payload = msgId: number, deviceId: string
 ```
 
-#### `setDeviceVolume`
+#### `setDeviceVolume` ✅
 ```
 payload = msgId: number, deviceId: string, muted: boolean, volumePercent: int (0 - 100), confirmVolumeChange: boolean
 - 'confirmVolumeChange' supresses 'return_setDeviceVolume' if false.
@@ -164,7 +164,7 @@ payload = [{
 payload = msgId: number, currentActiveDeviceId: string
 ```
 
-#### `return_setDeviceVolume`
+#### `return_setDeviceVolume` ✅
 ```
 payload = msgId: number, deviceId: string, newMuted: boolean, newVolumePercent: int (0 - 100)
 - Supressed if 'setDeviceVolume' is called with 'confirmValueChange = false'
@@ -176,17 +176,17 @@ payload = msgId: number, deviceId: string, newMuted: boolean, newVolumePercent: 
 
 #### `receiveSessionPeakValueUpdates`
 ```
-payload = msgId: number, sessionId: string, value: boolean
+payload = msgId: number, deviceId: string, sessionId: string, value: boolean
 ```
 
 #### `receiveSessionVolumeUpdates`
 ```
-payload = msgId: number, sessionId: string, value: boolean
+payload = msgId: number, deviceId: string, sessionId: string, value: boolean
 ```
 
 #### `setSessionVolume`
 ```
-payload = msgId: number, sessionId: string, muted: boolean, volumePercent: int (0 - 100), confirmVolumeChange: boolean
+payload = msgId: number, deviceId: string, sessionId: string, muted: boolean, volumePercent: int (0 - 100), confirmVolumeChange: boolean
 - 'confirmVolumeChange' supresses 'return_setSessionVolume' if false.
 - This method also does not fire 'update_sessionVolume'.
 ```
@@ -195,25 +195,25 @@ payload = msgId: number, sessionId: string, muted: boolean, volumePercent: int (
 
 #### `return_receiveSessionPeakValueUpdates`
 ```
-payload = msgId: number, sessionId: string, newState: boolean
+payload = msgId: number, deviceId: string, sessionId: string, newState: boolean
 ```
 
 #### `update_sessionPeakValue`
 ```
-payload = sessionId: string, newPeakValue: float (0 - 1)
+payload = deviceId: string, sessionId: string, newPeakValue: float (0 - 1)
 ```
 
 #### `return_receiveSessionVolumeUpdates`
 ```
-payload = msgId: number, sessionId: string, newState: boolean
+payload = msgId: number, deviceId: string, sessionId: string, newState: boolean
 ```
 
 #### `update_sessionVolume`
 ```
-payload = sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
+payload = deviceId: string, sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
 ```
 
 #### `return_setSessionVolume`
 ```
-payload = msgId: number, sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
+payload = msgId: number, deviceId: string, sessionId: string, newMuted: boolean, newVolume: int (0 - 100)
 ```
